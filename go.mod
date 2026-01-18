@@ -1,6 +1,6 @@
-module github.com/hashicorp/packer-plugin-scaffolding
+module github.com/julianolf/packer-plugin-magalucloud
 
-go 1.23.2
+go 1.25.6
 
 require (
 	github.com/hashicorp/hcl/v2 v2.19.1

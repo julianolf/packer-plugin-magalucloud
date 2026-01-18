@@ -3,7 +3,7 @@
   data source environment. See https://www.packer.io/docs/data-source/amazon-ami
 -->
 
-The scaffolding data source is used to create endless Packer plugins using
+The magalucloud data source is used to create endless Packer plugins using
 a consistent plugin structure.
 
 
@@ -11,7 +11,7 @@ a consistent plugin structure.
 
 **Required**
 
-- `mock` (string) - The name of the mock to use for the Scaffolding API.
+- `mock` (string) - The name of the mock to use for the magalucloud API.
 
 
 <!--
@@ -24,7 +24,7 @@ a consistent plugin structure.
 
 **Optional**
 
-- `mock_api_url` (string) - The Scaffolding API endpoint to connect to.
+- `mock_api_url` (string) - The magalucloud API endpoint to connect to.
   Defaults to https://example.com
 
 
@@ -37,8 +37,8 @@ a consistent plugin structure.
 
 ### OutPut
 
-- `foo` (string) - The Scaffolding output foo value.
-- `bar` (string) - The Scaffolding output bar value.
+- `foo` (string) - The magalucloud output foo value.
+- `bar` (string) - The magalucloud output bar value.
 
 <!--
   A basic example on the usage of the data source. Multiple examples
@@ -50,14 +50,14 @@ a consistent plugin structure.
 
 
 ```hcl
-data "scaffolding" "example" {
+data "magalucloud" "example" {
    mock = "bird"
  }
- source "scaffolding" "example" {
-   mock = data.scaffolding.example.foo
+ source "magalucloud" "example" {
+   mock = data.magalucloud.example.foo
  }
 
  build {
-   sources = ["source.scaffolding.example"]
+   sources = ["source.magalucloud.example"]
  }
 ```

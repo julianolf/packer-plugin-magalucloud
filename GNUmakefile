@@ -1,4 +1,4 @@
-NAME=scaffolding
+NAME=magalucloud
 BINARY=packer-plugin-${NAME}
 
 COUNT?=1

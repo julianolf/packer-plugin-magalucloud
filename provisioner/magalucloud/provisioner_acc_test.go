@@ -1,7 +1,7 @@
 // Copyright (c) Juliano Fernandes 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package scaffolding
+package magalucloud
 
 import (
 	_ "embed"
@@ -16,20 +16,20 @@ import (
 )
 
 //go:embed test-fixtures/template.pkr.hcl
-var testDatasourceHCL2Basic string
+var testProvisionerHCL2Basic string
 
-// Run with: PACKER_ACC=1 go test -count 1 -v ./datasource/scaffolding/data_acc_test.go  -timeout=120m
-func TestAccScaffoldingDatasource(t *testing.T) {
+// Run with: PACKER_ACC=1 go test -count 1 -v ./provisioner/magalucloud/provisioner_acc_test.go  -timeout=120m
+func TestAccMagaluCloudProvisioner(t *testing.T) {
 	testCase := &acctest.PluginTestCase{
-		Name: "scaffolding_datasource_basic_test",
+		Name: "magalucloud_provisioner_basic_test",
 		Setup: func() error {
 			return nil
 		},
 		Teardown: func() error {
 			return nil
 		},
-		Template: testDatasourceHCL2Basic,
-		Type:     "scaffolding-my-datasource",
+		Template: testProvisionerHCL2Basic,
+		Type:     "magalucloud-my-provisioner",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
 				if buildCommand.ProcessState.ExitCode() != 0 {
@@ -49,14 +49,9 @@ func TestAccScaffoldingDatasource(t *testing.T) {
 			}
 			logsString := string(logsBytes)
 
-			fooLog := "null.basic-example: foo: foo-value"
-			barLog := "null.basic-example: bar: bar-value"
-
-			if matched, _ := regexp.MatchString(fooLog+".*", logsString); !matched {
+			provisionerOutputLog := "null.basic-example: provisioner mock: my-mock-config"
+			if matched, _ := regexp.MatchString(provisionerOutputLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected foo value %q", logsString)
-			}
-			if matched, _ := regexp.MatchString(barLog+".*", logsString); !matched {
-				t.Fatalf("logs doesn't contain expected bar value %q", logsString)
 			}
 			return nil
 		},

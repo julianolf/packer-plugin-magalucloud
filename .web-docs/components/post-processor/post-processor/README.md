@@ -3,7 +3,7 @@
   be helpful to a user. See https://www.packer.io/docs/provisioner/null
 -->
 
-The scaffolding post-processor is used to export Packer Scaffolding builds.
+The magalucloud post-processor is used to export Packer magalucloud builds.
 
 
 <!-- Post-Processor Configuration Fields -->
@@ -32,15 +32,15 @@ The scaffolding post-processor is used to export Packer Scaffolding builds.
 
 
 ```hcl
- source "scaffolding" "example" {
+ source "magalucloud" "example" {
    mock = "jay"
  }
 
  build {
-   sources = ["source.scaffolding.example"]
+   sources = ["source.magalucloud.example"]
 
-   post-processor "scaffolding" {
-     mock = "builds/scaffolding.box"
+   post-processor "magalucloud" {
+     mock = "builds/magalucloud.box"
    }
  }
 ```

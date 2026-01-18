@@ -1,7 +1,7 @@
 // Copyright (c) Juliano Fernandes 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package scaffolding
+package magalucloud
 
 import (
 	_ "embed"
@@ -16,20 +16,20 @@ import (
 )
 
 //go:embed test-fixtures/template.pkr.hcl
-var testBuilderHCL2Basic string
+var testPostProcessorHCL2Basic string
 
-// Run with: PACKER_ACC=1 go test -count 1 -v ./builder/scaffolding/builder_acc_test.go  -timeout=120m
-func TestAccScaffoldingBuilder(t *testing.T) {
+// Run with: PACKER_ACC=1 go test -count 1 -v ./post-processor/magalucloud/post-processor_acc_test.go  -timeout=120m
+func TestAccMagaluCloudPostProcessor(t *testing.T) {
 	testCase := &acctest.PluginTestCase{
-		Name: "scaffolding_builder_basic_test",
+		Name: "magalucloud_post-processor_basic_test",
 		Setup: func() error {
 			return nil
 		},
 		Teardown: func() error {
 			return nil
 		},
-		Template: testBuilderHCL2Basic,
-		Type:     "scaffolding-my-builder",
+		Template: testPostProcessorHCL2Basic,
+		Type:     "magalucloud-my-post-processor",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
 				if buildCommand.ProcessState.ExitCode() != 0 {
@@ -49,8 +49,8 @@ func TestAccScaffoldingBuilder(t *testing.T) {
 			}
 			logsString := string(logsBytes)
 
-			buildGeneratedDataLog := "scaffolding-my-builder.basic-example: build generated data: mock-build-data"
-			if matched, _ := regexp.MatchString(buildGeneratedDataLog+".*", logsString); !matched {
+			postProcessorOutputLog := "post-processor mock: my-mock-config"
+			if matched, _ := regexp.MatchString(postProcessorOutputLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected foo value %q", logsString)
 			}
 			return nil

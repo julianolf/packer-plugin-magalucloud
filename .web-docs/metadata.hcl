@@ -5,9 +5,9 @@
 # This metadata.hcl file and the adjacent `components` docs directory should
 # be kept in a `.web-docs` directory at the root of your plugin repository.
 integration {
-  name = "Integration Template"
+  name        = "Integration Template"
   description = "This is an integration template"
-  identifier = "packer/hashicorp/scaffolding"
+  identifier  = "packer/hashicorp/magalucloud"
   flags = [
     # Remove if the plugin does not conform to the HCP Packer requirements.
     #
@@ -35,7 +35,7 @@ integration {
   }
   license {
     type = "MPL-2.0"
-    url = "https://github.com/hashicorp/integration-template/blob/main/LICENSE.md"
+    url  = "https://github.com/hashicorp/integration-template/blob/main/LICENSE.md"
   }
   component {
     type = "builder"

@@ -3,7 +3,7 @@
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
-package scaffolding
+package magalucloud
 
 import (
 	"context"
@@ -30,7 +30,7 @@ func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		PluginType:         "packer.provisioner.scaffolding",
+		PluginType:         "packer.provisioner.magalucloud",
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

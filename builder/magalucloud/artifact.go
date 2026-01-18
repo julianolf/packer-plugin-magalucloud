@@ -1,7 +1,7 @@
 // Copyright (c) Juliano Fernandes 2026
 // SPDX-License-Identifier: MPL-2.0
 
-package scaffolding
+package magalucloud
 
 // packersdk.Artifact implementation
 type Artifact struct {

@@ -31,25 +31,25 @@ $ packer plugins install github.com/organization/plugin-name
 
 ### Components
 
-The Scaffolding plugin is intended as a starting point for creating Packer plugins
+The magalucloud plugin is intended as a starting point for creating Packer plugins
 
 #### Builders
 
-- [builder](/packer/integrations/hashicorp/scaffolding/latest/components/builder/builder-name) - The scaffolding builder is used to create endless Packer
+- [builder](/packer/integrations/hashicorp/magalucloud/latest/components/builder/builder-name) - The magalucloud builder is used to create endless Packer
   plugins using a consistent plugin structure.
 
 #### Provisioners
 
-- [provisioner](/packer/integrations/hashicorp/scaffolding/latest/components/provisioner/provisioner-name) - The scaffolding provisioner is used to provisioner
+- [provisioner](/packer/integrations/hashicorp/magalucloud/latest/components/provisioner/provisioner-name) - The magalucloud provisioner is used to provisioner
   Packer builds.
 
 #### Post-processors
 
-- [post-processor](/packer/integrations/hashicorp/scaffolding/latest/components/post-processor/postprocessor-name) - The scaffolding post-processor is used to
-  export scaffolding builds.
+- [post-processor](/packer/integrations/hashicorp/magalucloud/latest/components/post-processor/postprocessor-name) - The magalucloud post-processor is used to
+  export magalucloud builds.
 
 #### Data Sources
 
-- [data source](/packer/integrations/hashicorp/scaffolding/latest/components/datasource/datasource-name) - The scaffolding data source is used to
-  export scaffolding data.
+- [data source](/packer/integrations/hashicorp/magalucloud/latest/components/datasource/datasource-name) - The magalucloud data source is used to
+  export magalucloud data.
 

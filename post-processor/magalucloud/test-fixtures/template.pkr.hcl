@@ -10,7 +10,7 @@ build {
     "source.null.basic-example"
   ]
 
-  provisioner "scaffolding-my-provisioner" {
+  post-processor "magalucloud-my-post-processor" {
     mock = "my-mock-config"
   }
 }
