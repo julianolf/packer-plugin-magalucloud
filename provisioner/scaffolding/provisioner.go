@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2020, 2025
+// Copyright (c) Juliano Fernandes 2026
 // SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
