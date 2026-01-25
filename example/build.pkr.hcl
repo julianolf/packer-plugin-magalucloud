@@ -4,40 +4,52 @@
 packer {
   required_plugins {
     magalucloud = {
-      version = ">=v0.1.0"
       source  = "github.com/julianolf/magalucloud"
+      version = ">= 0.0.1"
     }
   }
 }
 
-source "magalucloud-my-builder" "foo-example" {
-  mock = local.foo
+var "token" {
+  type      = string
+  default   = "${env("MGC_API_KEY")}"
+  sensitive = true
 }
 
-source "magalucloud-my-builder" "bar-example" {
-  mock = local.bar
+var "source_image" {
+  type    = string
+  default = "cloud-ubuntu-22.04 LTS"
+}
+
+var "machine_type" {
+  type    = string
+  default = "BV1-1-10"
+}
+
+var "region" {
+  type    = string
+  default = "br-se1"
+}
+
+var "ssh_key" {
+  type    = string
+  default = "ssh-ed25519"
+}
+
+source "magalucloud" "example" {
+  token        = var.token
+  source_image = var.source_image
+  machine_type = var.machine_type
+  region       = var.region
+  ssh_key      = var.ssh_key
 }
 
 build {
-  sources = [
-    "source.magalucloud-my-builder.foo-example",
-  ]
+  name = "custom-ubuntu"
 
-  source "source.magalucloud-my-builder.bar-example" {
-    name = "bar"
-  }
+  sources = ["source.magalucloud.example"]
 
-  provisioner "magalucloud-my-provisioner" {
-    only = ["magalucloud-my-builder.foo-example"]
-    mock = "foo: ${local.foo}"
-  }
-
-  provisioner "magalucloud-my-provisioner" {
-    only = ["magalucloud-my-builder.bar"]
-    mock = "bar: ${local.bar}"
-  }
-
-  post-processor "magalucloud-my-post-processor" {
-    mock = "post-processor mock-config"
+  provisioner "shell-local" {
+    inline = ["echo Hello Packer"]
   }
 }
