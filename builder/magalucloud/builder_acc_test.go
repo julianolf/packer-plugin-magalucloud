@@ -6,7 +6,8 @@ package magalucloud
 import (
 	_ "embed"
 	"fmt"
-	"io/ioutil"
+	"io"
+
 	"os"
 	"os/exec"
 	"regexp"
@@ -21,7 +22,7 @@ var testBuilderHCL2Basic string
 // Run with: PACKER_ACC=1 go test -count 1 -v ./builder/magalucloud/builder_acc_test.go  -timeout=120m
 func TestAccMagaluCloudBuilder(t *testing.T) {
 	testCase := &acctest.PluginTestCase{
-		Name: "magalucloud_builder_basic_test",
+		Name: "magalucloud_builder_test",
 		Setup: func() error {
 			return nil
 		},
@@ -29,7 +30,7 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 			return nil
 		},
 		Template: testBuilderHCL2Basic,
-		Type:     "magalucloud-my-builder",
+		Type:     "magalucloud",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
 				if buildCommand.ProcessState.ExitCode() != 0 {
@@ -43,13 +44,13 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 			}
 			defer logs.Close()
 
-			logsBytes, err := ioutil.ReadAll(logs)
+			logsBytes, err := io.ReadAll(logs)
 			if err != nil {
 				return fmt.Errorf("Unable to read %s", logfile)
 			}
 			logsString := string(logsBytes)
 
-			buildGeneratedDataLog := "magalucloud-my-builder.basic-example: build generated data: mock-build-data"
+			buildGeneratedDataLog := "test.magalucloud.basic: Creating virtual machine instance from: cloud-ubuntu-22.04 LTS"
 			if matched, _ := regexp.MatchString(buildGeneratedDataLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected foo value %q", logsString)
 			}

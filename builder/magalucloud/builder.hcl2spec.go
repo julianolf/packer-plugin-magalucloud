@@ -3,6 +3,7 @@
 package magalucloud
 
 import (
+	"github.com/MagaluCloud/mgc-sdk-go/client"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -18,7 +19,13 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	MockOption          *string           `mapstructure:"mock" cty:"mock" hcl:"mock"`
+	Token               *string           `mapstructure:"token" required:"true" cty:"token" hcl:"token"`
+	Region              *Region           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	SourceImage         *string           `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
+	MachineType         *string           `mapstructure:"machine_type" required:"true" cty:"machine_type" hcl:"machine_type"`
+	SSHKey              *string           `mapstructure:"ssh_key" required:"true" cty:"ssh_key" hcl:"ssh_key"`
+	ImageName           *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
+	URL                 *client.MgcUrl    `mapstructure:"url" required:"false" cty:"url" hcl:"url"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -41,7 +48,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"mock":                       &hcldec.AttrSpec{Name: "mock", Type: cty.String, Required: false},
+		"token":                      &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"region":                     &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"source_image":               &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
+		"machine_type":               &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},
+		"ssh_key":                    &hcldec.AttrSpec{Name: "ssh_key", Type: cty.String, Required: false},
+		"image_name":                 &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
+		"url":                        &hcldec.AttrSpec{Name: "url", Type: cty.String, Required: false},
 	}
 	return s
 }

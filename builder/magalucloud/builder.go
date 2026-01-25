@@ -7,7 +7,11 @@ package magalucloud
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/MagaluCloud/mgc-sdk-go/client"
+	"github.com/MagaluCloud/mgc-sdk-go/compute"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -16,11 +20,27 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
-const BuilderId = "magalucloud.builder"
+const (
+	BuilderId    = "julianolf.magalucloud"
+	waitInterval = 30 * time.Second
+)
+
+type Region string
+
+var Regions map[Region]client.MgcUrl = map[Region]client.MgcUrl{
+	"br-se1": client.BrSe1,
+	"br-ne1": client.BrNe1,
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	MockOption          string `mapstructure:"mock"`
+	Token               string        `mapstructure:"token" required:"true"`
+	Region              Region        `mapstructure:"region" required:"true"`
+	SourceImage         string        `mapstructure:"source_image" required:"true"`
+	MachineType         string        `mapstructure:"machine_type" required:"true"`
+	SSHKey              string        `mapstructure:"ssh_key" required:"true"`
+	ImageName           string        `mapstructure:"image_name" required:"false"`
+	URL                 client.MgcUrl `mapstructure:"url" required:"false"`
 }
 
 type Builder struct {
@@ -28,56 +48,57 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec {
+	return b.config.FlatMapstructure().HCL2Spec()
+}
 
-func (b *Builder) Prepare(raws ...interface{}) (generatedVars []string, warnings []string, err error) {
-	err = config.Decode(&b.config, &config.DecodeOpts{
-		PluginType:  "packer.builder.magalucloud",
-		Interpolate: true,
-	}, raws...)
+func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []string, err error) {
+	err = config.Decode(
+		&b.config,
+		&config.DecodeOpts{
+			PluginType:  BuilderId,
+			Interpolate: true,
+		},
+		raws...,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
-	// Return the placeholder for the generated data that will become available to provisioners and post-processors.
-	// If the builder doesn't generate any data, just return an empty slice of string: []string{}
-	buildGeneratedData := []string{"GeneratedMockData"}
-	return buildGeneratedData, nil, nil
+
+	url, ok := Regions[b.config.Region]
+	if !ok {
+		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
+	}
+
+	b.config.URL = url
+	b.config.ImageName = fmt.Sprintf("packer-%s", time.Now().Format("20060102150405"))
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	steps := []multistep.Step{}
+	cli := client.NewMgcClient(client.WithBaseURL(b.config.URL), client.WithAPIKey(b.config.Token))
 
-	steps = append(steps,
-		&StepSayConfig{
-			MockConfig: b.config.MockOption,
-		},
-		new(commonsteps.StepProvision),
-	)
-
-	// Setup the state bag and initial state for the steps
-	state := new(multistep.BasicStateBag)
+	state := &multistep.BasicStateBag{}
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("compute", compute.New(cli))
 
-	// Set the value of the generated data that will become available to provisioners.
-	// To share the data with post-processors, use the StateData in the artifact.
-	state.Put("generated_data", map[string]interface{}{
-		"GeneratedMockData": "mock-build-data",
-	})
+	steps := []multistep.Step{
+		&StepCreateInstance{},
+		&StepWaitInstanceBoot{},
+		&commonsteps.StepProvision{},
+		&StepDeleteInstance{},
+		&StepWaitInstanceTeardown{},
+	}
 
-	// Run!
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
-	// If there was an error, return that
 	if err, ok := state.GetOk("error"); ok {
 		return nil, err.(error)
 	}
 
-	artifact := &Artifact{
-		// Add the builder generated data to the artifact StateData so that post-processors
-		// can access them.
-		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
-	}
+	artifact := &Artifact{StateData: map[string]any{}}
 	return artifact, nil
 }
