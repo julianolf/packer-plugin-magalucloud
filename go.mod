@@ -4,11 +4,27 @@ go 1.25.6
 
 require (
 	github.com/hashicorp/hcl/v2 v2.24.0
-	github.com/hashicorp/packer-plugin-sdk v0.6.4
+	github.com/hashicorp/packer-plugin-sdk v0.6.5
 	github.com/zclconf/go-cty v1.17.0
 )
 
-require gopkg.in/yaml.v3 v3.0.1 // indirect
+require (
+	github.com/aws/aws-sdk-go-v2 v1.37.2 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.30.3 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.18.3 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.37.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.27.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.32.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.36.0 // indirect
+	github.com/aws/smithy-go v1.22.5 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
 
 require (
 	cel.dev/expr v0.25.1 // indirect
