@@ -16,7 +16,7 @@ type StepWaitInstanceTeardown struct{}
 func (s *StepWaitInstanceTeardown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("compute").(*compute.VirtualMachineClient)
-	id := state.Get("id").(string)
+	id := state.Get("instance_id").(string)
 
 	ui.Say(fmt.Sprintf("Waiting for virtual machine instance teardown with ID: %s", id))
 

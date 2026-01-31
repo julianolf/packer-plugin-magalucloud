@@ -23,8 +23,8 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		Name:        cfg.ImageName,
 		MachineType: compute.IDOrName{Name: helpers.StrPtr(cfg.MachineType)},
 		Image:       compute.IDOrName{Name: helpers.StrPtr(cfg.SourceImage)},
-		Network:     &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(false)},
-		SshKeyName:  helpers.StrPtr(cfg.SSHKey),
+		Network:     &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(true)},
+		SshKeyName:  helpers.StrPtr(cfg.Comm.SSH.SSHTemporaryKeyPairName),
 	}
 
 	id, err := cli.Instances().Create(ctx, req)
@@ -33,7 +33,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
-	state.Put("id", id)
+	state.Put("instance_id", id)
 	return multistep.ActionContinue
 }
 

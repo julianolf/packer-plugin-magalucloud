@@ -12,12 +12,15 @@ import (
 
 	"github.com/MagaluCloud/mgc-sdk-go/client"
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
+	"github.com/MagaluCloud/mgc-sdk-go/sshkeys"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/uuid"
 )
 
 const (
@@ -34,13 +37,13 @@ var Regions map[Region]client.MgcUrl = map[Region]client.MgcUrl{
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	Token               string        `mapstructure:"token" required:"true"`
-	Region              Region        `mapstructure:"region" required:"true"`
-	SourceImage         string        `mapstructure:"source_image" required:"true"`
-	MachineType         string        `mapstructure:"machine_type" required:"true"`
-	SSHKey              string        `mapstructure:"ssh_key" required:"true"`
-	ImageName           string        `mapstructure:"image_name" required:"false"`
-	URL                 client.MgcUrl `mapstructure:"url" required:"false"`
+	Comm                communicator.Config `mapstructure:",squash"`
+	Token               string              `mapstructure:"token" required:"true"`
+	Region              Region              `mapstructure:"region" required:"true"`
+	SourceImage         string              `mapstructure:"source_image" required:"true"`
+	MachineType         string              `mapstructure:"machine_type" required:"true"`
+	ImageName           string              `mapstructure:"image_name" required:"false"`
+	URL                 client.MgcUrl       `mapstructure:"url" required:"false"`
 }
 
 type Builder struct {
@@ -70,26 +73,43 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
 	}
 
+	id := uuid.TimeOrderedUUID()
 	b.config.URL = url
-	b.config.ImageName = fmt.Sprintf("packer-%s", time.Now().Format("20060102150405"))
+	b.config.ImageName = fmt.Sprintf("packer-%s", id)
+	b.config.Comm.SSH.SSHTemporaryKeyPairName = fmt.Sprintf("packer-%s", id)
+	b.config.Comm.SSH.SSHTemporaryKeyPairType = "ed25519"
 	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	cli := client.NewMgcClient(client.WithBaseURL(b.config.URL), client.WithAPIKey(b.config.Token))
+	globalClient := client.NewMgcClient(client.WithAPIKey(b.config.Token))
+	regionalClient := client.NewMgcClient(client.WithAPIKey(b.config.Token), client.WithBaseURL(b.config.URL))
 
 	state := &multistep.BasicStateBag{}
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("compute", compute.New(cli))
+	state.Put("sshkeys", sshkeys.New(globalClient))
+	state.Put("compute", compute.New(regionalClient))
 
 	steps := []multistep.Step{
+		&communicator.StepSSHKeyGen{
+			CommConf:            &b.config.Comm,
+			SSHTemporaryKeyPair: b.config.Comm.SSH.SSHTemporaryKeyPair,
+		},
+		multistep.If(
+			b.config.PackerDebug,
+			&communicator.StepDumpSSHKey{
+				Path: fmt.Sprintf("mgc_%s.pem", b.config.PackerBuildName),
+				SSH:  &b.config.Comm.SSH,
+			}),
+		&StepUploadSSHKey{},
 		&StepCreateInstance{},
 		&StepWaitInstanceBoot{},
 		&commonsteps.StepProvision{},
 		&StepDeleteInstance{},
 		&StepWaitInstanceTeardown{},
+		&StepDeleteSSHKey{},
 	}
 
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
