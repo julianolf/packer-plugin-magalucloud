@@ -7,6 +7,7 @@ package magalucloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
 )
 
@@ -44,6 +46,7 @@ type Config struct {
 	MachineType         string              `mapstructure:"machine_type" required:"true"`
 	ImageName           string              `mapstructure:"image_name" required:"false"`
 	URL                 client.MgcUrl       `mapstructure:"url" required:"false"`
+	ctx                 interpolate.Context
 }
 
 type Builder struct {
@@ -66,6 +69,10 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 	)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if err := b.config.Comm.Prepare(&b.config.ctx); len(err) > 0 {
+		return nil, nil, errors.Join(err...)
 	}
 
 	url, ok := Regions[b.config.Region]
@@ -106,6 +113,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepUploadSSHKey{},
 		&StepCreateInstance{},
 		&StepWaitInstanceBoot{},
+		&communicator.StepConnect{
+			Config:    &b.config.Comm,
+			Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
+		},
 		&commonsteps.StepProvision{},
 		&StepDeleteInstance{},
 		&StepWaitInstanceTeardown{},

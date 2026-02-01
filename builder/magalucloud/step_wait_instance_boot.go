@@ -29,7 +29,7 @@ func (s *StepWaitInstanceBoot) Run(ctx context.Context, state multistep.StateBag
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-ticker.C:
-			instance, err := cli.Instances().Get(ctx, id, []compute.InstanceExpand{})
+			instance, err := cli.Instances().Get(ctx, id, []compute.InstanceExpand{compute.InstanceNetworkExpand})
 			if err != nil {
 				state.Put("error", fmt.Errorf("Error querying virtual machine: %s", err))
 				return multistep.ActionHalt
@@ -43,6 +43,11 @@ func (s *StepWaitInstanceBoot) Run(ctx context.Context, state multistep.StateBag
 				return multistep.ActionHalt
 			}
 			if instance.State == "running" && instance.Status == "completed" {
+				ip := (*instance.Network.Interfaces)[0].AssociatedPublicIpv4
+				if ip == nil {
+					continue
+				}
+				state.Put("instance_ip", *ip)
 				return multistep.ActionContinue
 			}
 		}
