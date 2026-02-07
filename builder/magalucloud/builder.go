@@ -121,6 +121,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&commonsteps.StepProvision{},
 		&StepStopInstance{},
 		&StepWaitInstanceStop{},
+		&StepCreateSnapshot{},
+		&StepWaitSnapshotCreation{},
 		&StepDeleteInstance{},
 		&StepWaitInstanceTeardown{},
 		&StepDeleteSSHKey{},
