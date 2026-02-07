@@ -119,6 +119,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&commonsteps.StepProvision{},
+		&StepStopInstance{},
+		&StepWaitInstanceStop{},
 		&StepDeleteInstance{},
 		&StepWaitInstanceTeardown{},
 		&StepDeleteSSHKey{},
