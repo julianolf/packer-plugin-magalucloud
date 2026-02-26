@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/julianolf/packer-plugin-magalucloud/builder/magalucloud"
+	postprocessor "github.com/julianolf/packer-plugin-magalucloud/post-processor/magalucloud"
 	"github.com/julianolf/packer-plugin-magalucloud/version"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -16,6 +17,7 @@ import (
 func main() {
 	pps := plugin.NewSet()
 	pps.RegisterBuilder(plugin.DEFAULT_NAME, new(magalucloud.Builder))
+	pps.RegisterPostProcessor("import", new(postprocessor.Importer))
 	pps.SetVersion(version.PluginVersion)
 	err := pps.Run()
 	if err != nil {
