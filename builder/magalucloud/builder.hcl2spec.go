@@ -70,6 +70,7 @@ type FlatConfig struct {
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	APIKey                    *string           `mapstructure:"api_key" cty:"api_key" hcl:"api_key"`
 	Region                    *Region           `mapstructure:"region" cty:"region" hcl:"region"`
+	AvailabilityZone          *string           `mapstructure:"availability_zone" cty:"availability_zone" hcl:"availability_zone"`
 	SourceImage               *string           `mapstructure:"source_image" cty:"source_image" hcl:"source_image"`
 	MachineType               *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
 	ImageName                 *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
@@ -147,6 +148,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"api_key":                      &hcldec.AttrSpec{Name: "api_key", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"availability_zone":            &hcldec.AttrSpec{Name: "availability_zone", Type: cty.String, Required: false},
 		"source_image":                 &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
 		"machine_type":                 &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},

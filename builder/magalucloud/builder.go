@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/MagaluCloud/mgc-sdk-go/client"
@@ -42,6 +43,7 @@ type Config struct {
 	Comm                communicator.Config `mapstructure:",squash"`
 	APIKey              string              `mapstructure:"api_key"`
 	Region              Region              `mapstructure:"region"`
+	AvailabilityZone    string              `mapstructure:"availability_zone"`
 	SourceImage         string              `mapstructure:"source_image"`
 	MachineType         string              `mapstructure:"machine_type"`
 	ImageName           string              `mapstructure:"image_name"`
@@ -81,6 +83,13 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 	url, ok := Regions[b.config.Region]
 	if !ok {
 		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
+	}
+
+	if b.config.AvailabilityZone == "" {
+		b.config.AvailabilityZone = fmt.Sprintf("%s-a", b.config.Region)
+	}
+	if !strings.HasPrefix(b.config.AvailabilityZone, string(b.config.Region)) {
+		return nil, nil, fmt.Errorf("Invalid availability zone: %s", b.config.AvailabilityZone)
 	}
 
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())

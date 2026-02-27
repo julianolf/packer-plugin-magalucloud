@@ -25,11 +25,12 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ui.Sayf("Creating virtual machine instance from %s", s.Config.SourceImage)
 
 	req := compute.CreateRequest{
-		Name:        s.Config.ImageName,
-		MachineType: compute.IDOrName{Name: helpers.StrPtr(s.Config.MachineType)},
-		Image:       compute.IDOrName{Name: helpers.StrPtr(s.Config.SourceImage)},
-		Network:     &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(true)},
-		SshKeyName:  helpers.StrPtr(s.Config.Comm.SSH.SSHTemporaryKeyPairName),
+		Name:             s.Config.ImageName,
+		MachineType:      compute.IDOrName{Name: helpers.StrPtr(s.Config.MachineType)},
+		Image:            compute.IDOrName{Name: helpers.StrPtr(s.Config.SourceImage)},
+		Network:          &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(true)},
+		SshKeyName:       helpers.StrPtr(s.Config.Comm.SSH.SSHTemporaryKeyPairName),
+		AvailabilityZone: helpers.StrPtr(s.Config.AvailabilityZone),
 	}
 
 	data, _ := json.Marshal(req)
