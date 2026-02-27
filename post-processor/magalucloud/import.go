@@ -50,7 +50,7 @@ var Regions = map[Region]URL{
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	Token               string                 `mapstructure:"token"`
+	APIKey              string                 `mapstructure:"api_key"`
 	AccessKey           string                 `mapstructure:"access_key"`
 	SecretKey           string                 `mapstructure:"secret_key"`
 	Region              Region                 `mapstructure:"region"`
@@ -112,7 +112,7 @@ func (i *Importer) Configure(raws ...any) error {
 	}
 
 	cli := client.NewMgcClient(
-		client.WithAPIKey(i.config.Token),
+		client.WithAPIKey(i.config.APIKey),
 		client.WithBaseURL(i.config.URL),
 	)
 	obj, err := objectstorage.New(
@@ -132,21 +132,17 @@ func (i *Importer) Configure(raws ...any) error {
 }
 
 func (i *Importer) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
-	ui.Say("Uploading image to object storage")
-	sURL, err := i.uploadImage(ctx, artifact)
+	sURL, err := i.uploadImage(ctx, ui, artifact)
 	if err != nil {
 		return nil, false, false, err
 	}
 
-	ui.Sayf("Importing image %s", i.config.ImageName)
-	id, err := i.importImage(ctx, sURL)
+	_, err = i.importImage(ctx, ui, sURL)
 	if err != nil {
 		return nil, false, false, err
 	}
 
-	ui.Sayf("Finished importing image with ID %s", id)
-
-	err = i.cleanup(ctx)
+	err = i.cleanup(ctx, ui)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -158,6 +154,7 @@ func findImage(artifact packersdk.Artifact) (string, error) {
 	source := ""
 	for _, path := range artifact.Files() {
 		if strings.HasSuffix(path, ImageFileExt) {
+			log.Printf("[DEBUG] Image file %s found in artifact from builder", path)
 			source = path
 			break
 		}
@@ -186,7 +183,7 @@ func validateImage(file *os.File) error {
 	return nil
 }
 
-func (i *Importer) uploadImage(ctx context.Context, artifact packersdk.Artifact) (string, error) {
+func (i *Importer) uploadImage(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (string, error) {
 	filename, err := findImage(artifact)
 	if err != nil {
 		return "", err
@@ -213,7 +210,7 @@ func (i *Importer) uploadImage(ctx context.Context, artifact packersdk.Artifact)
 	}
 	size := stat.Size()
 
-	log.Printf("[DEBUG] Uploading %s to %s bucket", i.config.Filename, i.config.Bucket)
+	ui.Sayf("Uploading %s to %s bucket", i.config.Filename, i.config.Bucket)
 
 	err = i.objectstorage.Objects().Upload(
 		ctx,
@@ -227,7 +224,7 @@ func (i *Importer) uploadImage(ctx context.Context, artifact packersdk.Artifact)
 		return "", err
 	}
 
-	log.Printf("[DEBUG] Generating presigned URL for %s/%s", i.config.Bucket, i.config.Filename)
+	ui.Sayf("Generating presigned URL for %s/%s/%s", i.config.Endpoint, i.config.Bucket, i.config.Filename)
 
 	sURL, err := i.objectstorage.Presigner().GeneratePresignedURL(
 		ctx,
@@ -245,7 +242,7 @@ func (i *Importer) uploadImage(ctx context.Context, artifact packersdk.Artifact)
 	return sURL.String(), nil
 }
 
-func (i *Importer) importImage(ctx context.Context, sURL string) (string, error) {
+func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string) (string, error) {
 	req := compute.CreateCustomImageRequest{
 		Name:         i.config.ImageName,
 		Platform:     i.config.Platform,
@@ -258,7 +255,9 @@ func (i *Importer) importImage(ctx context.Context, sURL string) (string, error)
 	}
 
 	data, _ := json.Marshal(req)
-	log.Printf("[DEBUG] Creating custom image %s with %s", i.config.ImageName, string(data))
+	log.Printf("[DEBUG] Create custom image data %s", string(data))
+
+	ui.Sayf("Importing image %s using presigned URL", i.config.ImageName)
 
 	id, err := i.compute.CustomImages().Create(ctx, req)
 	if err != nil {
@@ -282,6 +281,7 @@ func (i *Importer) importImage(ctx context.Context, sURL string) (string, error)
 
 			switch image.Status {
 			case compute.ImageStatusActive:
+				ui.Sayf("Finished importing image with ID %s", id)
 				return id, nil
 			case compute.ImageStatusCreating, compute.ImageStatusPending, compute.ImageStatusImporting:
 			default:
@@ -291,9 +291,9 @@ func (i *Importer) importImage(ctx context.Context, sURL string) (string, error)
 	}
 }
 
-func (i *Importer) cleanup(ctx context.Context) error {
+func (i *Importer) cleanup(ctx context.Context, ui packersdk.Ui) error {
 	if !i.config.SkipCleanup {
-		log.Printf("[DEBUG] Deleting %s from %s bucket", i.config.Filename, i.config.Bucket)
+		ui.Sayf("Deleting %s from %s bucket", i.config.Filename, i.config.Bucket)
 
 		return i.objectstorage.Objects().Delete(
 			ctx,

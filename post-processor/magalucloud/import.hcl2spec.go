@@ -21,7 +21,7 @@ type FlatConfig struct {
 	PackerOnError       *string                 `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string       `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string                `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Token               *string                 `mapstructure:"token" cty:"token" hcl:"token"`
+	APIKey              *string                 `mapstructure:"api_key" cty:"api_key" hcl:"api_key"`
 	AccessKey           *string                 `mapstructure:"access_key" cty:"access_key" hcl:"access_key"`
 	SecretKey           *string                 `mapstructure:"secret_key" cty:"secret_key" hcl:"secret_key"`
 	Region              *Region                 `mapstructure:"region" cty:"region" hcl:"region"`
@@ -60,7 +60,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"token":                      &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"api_key":                    &hcldec.AttrSpec{Name: "api_key", Type: cty.String, Required: false},
 		"access_key":                 &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"secret_key":                 &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
 		"region":                     &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
