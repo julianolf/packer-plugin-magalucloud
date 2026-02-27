@@ -14,16 +14,16 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-type StepWaitInstanceStop struct{}
+type StepWaitInstanceStop struct {
+	Client *compute.VirtualMachineClient
+}
 
 func (s *StepWaitInstanceStop) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	cli := state.Get("compute").(*compute.VirtualMachineClient)
 	id := state.Get("instance_id").(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Waiting for virtual machine instance %s stop", id)
 
-	ui.Say(fmt.Sprintf("Waiting for virtual machine instance with ID: %s", id))
-
-	ticker := time.NewTicker(waitInterval)
+	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
 	for {
@@ -32,7 +32,7 @@ func (s *StepWaitInstanceStop) Run(ctx context.Context, state multistep.StateBag
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-ticker.C:
-			instance, err := cli.Instances().Get(ctx, id, []compute.InstanceExpand{})
+			instance, err := s.Client.Instances().Get(ctx, id, []compute.InstanceExpand{})
 			if err != nil {
 				state.Put("error", fmt.Errorf("Error querying virtual machine: %s", err))
 				return multistep.ActionHalt

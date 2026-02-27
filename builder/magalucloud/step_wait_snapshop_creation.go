@@ -14,16 +14,16 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-type StepWaitSnapshotCreation struct{}
+type StepWaitSnapshotCreation struct {
+	Client *compute.VirtualMachineClient
+}
 
 func (s *StepWaitSnapshotCreation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	cli := state.Get("compute").(*compute.VirtualMachineClient)
 	id := state.Get("snapshot_id").(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Waiting for snapshot %s creation", id)
 
-	ui.Say(fmt.Sprintf("Waiting for snapshot with ID: %s", id))
-
-	ticker := time.NewTicker(waitInterval)
+	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
 	for {
@@ -32,7 +32,7 @@ func (s *StepWaitSnapshotCreation) Run(ctx context.Context, state multistep.Stat
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-ticker.C:
-			snapshot, err := cli.Snapshots().Get(ctx, id, []compute.SnapshotExpand{})
+			snapshot, err := s.Client.Snapshots().Get(ctx, id, []compute.SnapshotExpand{})
 			if err != nil {
 				state.Put("error", fmt.Errorf("Error querying snapshot: %s", err))
 				return multistep.ActionHalt

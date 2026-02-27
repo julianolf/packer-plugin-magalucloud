@@ -12,16 +12,16 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-type StepStopInstance struct{}
+type StepStopInstance struct {
+	Client *compute.VirtualMachineClient
+}
 
 func (s *StepStopInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	cli := state.Get("compute").(*compute.VirtualMachineClient)
 	id := state.Get("instance_id").(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Stopping virtual machine instance %s", id)
 
-	ui.Say(fmt.Sprintf("Stopping virtual machine instance with ID: %s", id))
-
-	err := cli.Instances().Stop(ctx, id)
+	err := s.Client.Instances().Stop(ctx, id)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error stopping virtual machine: %s", err))
 		return multistep.ActionHalt

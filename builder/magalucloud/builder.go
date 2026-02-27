@@ -27,7 +27,7 @@ import (
 
 const (
 	BuilderId    = "julianolf.magalucloud"
-	waitInterval = 30 * time.Second
+	WaitInterval = 30 * time.Second
 )
 
 type Region string
@@ -40,18 +40,21 @@ var Regions map[Region]client.MgcUrl = map[Region]client.MgcUrl{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
-	Token               string              `mapstructure:"token" required:"true"`
-	Region              Region              `mapstructure:"region" required:"true"`
-	SourceImage         string              `mapstructure:"source_image" required:"true"`
-	MachineType         string              `mapstructure:"machine_type" required:"true"`
-	ImageName           string              `mapstructure:"image_name" required:"false"`
-	URL                 client.MgcUrl       `mapstructure:"url" required:"false"`
-	ctx                 interpolate.Context
+	APIKey              string              `mapstructure:"api_key"`
+	Region              Region              `mapstructure:"region"`
+	SourceImage         string              `mapstructure:"source_image"`
+	MachineType         string              `mapstructure:"machine_type"`
+	ImageName           string              `mapstructure:"image_name"`
+	URL                 client.MgcUrl       `mapstructure:"url"`
+
+	ctx interpolate.Context
 }
 
 type Builder struct {
-	config Config
-	runner multistep.Runner
+	config  Config
+	runner  multistep.Runner
+	sshkeys *sshkeys.SSHKeyClient
+	compute *compute.VirtualMachineClient
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec {
@@ -80,24 +83,23 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
 	}
 
-	id := uuid.TimeOrderedUUID()
+	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+
 	b.config.URL = url
-	b.config.ImageName = fmt.Sprintf("packer-%s", id)
-	b.config.Comm.SSH.SSHTemporaryKeyPairName = fmt.Sprintf("packer-%s", id)
+	b.config.ImageName = name
+	b.config.Comm.SSH.SSHTemporaryKeyPairName = name
 	b.config.Comm.SSH.SSHTemporaryKeyPairType = "ed25519"
+
+	b.sshkeys = sshkeys.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey)))
+	b.compute = compute.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
+
 	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	globalClient := client.NewMgcClient(client.WithAPIKey(b.config.Token))
-	regionalClient := client.NewMgcClient(client.WithAPIKey(b.config.Token), client.WithBaseURL(b.config.URL))
-
 	state := &multistep.BasicStateBag{}
-	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("sshkeys", sshkeys.New(globalClient))
-	state.Put("compute", compute.New(regionalClient))
 
 	steps := []multistep.Step{
 		&communicator.StepSSHKeyGen{
@@ -110,22 +112,46 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Path: fmt.Sprintf("mgc_%s.pem", b.config.PackerBuildName),
 				SSH:  &b.config.Comm.SSH,
 			}),
-		&StepUploadSSHKey{},
-		&StepCreateInstance{},
-		&StepWaitInstanceBoot{},
+		&StepUploadSSHKey{
+			Client: b.sshkeys,
+			SSH:    &b.config.Comm.SSH,
+		},
+		&StepCreateInstance{
+			Client: b.compute,
+			Config: &b.config,
+		},
+		&StepWaitInstanceBoot{
+			Client: b.compute,
+		},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&commonsteps.StepProvision{},
-		&StepStopInstance{},
-		&StepWaitInstanceStop{},
-		&StepCreateSnapshot{},
-		&StepWaitSnapshotCreation{},
-		&StepDeleteInstance{},
-		&StepWaitInstanceTeardown{},
-		&StepDeleteSSHKey{},
+		&StepStopInstance{
+			Client: b.compute,
+		},
+		&StepWaitInstanceStop{
+			Client: b.compute,
+		},
+		&StepCreateSnapshot{
+			Client: b.compute,
+			Config: &b.config,
+		},
+		&StepWaitSnapshotCreation{
+			Client: b.compute,
+		},
+		&StepDeleteInstance{
+			Client: b.compute,
+		},
+		&StepWaitInstanceTeardown{
+			Client: b.compute,
+		},
+		&StepDeleteSSHKey{
+			Client: b.sshkeys,
+			SSH:    &b.config.Comm.SSH,
+		},
 	}
 
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)

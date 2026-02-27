@@ -12,16 +12,16 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-type StepDeleteInstance struct{}
+type StepDeleteInstance struct {
+	Client *compute.VirtualMachineClient
+}
 
 func (s *StepDeleteInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	cli := state.Get("compute").(*compute.VirtualMachineClient)
 	id := state.Get("instance_id").(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Deleting virtual machine instance %s", id)
 
-	ui.Say(fmt.Sprintf("Deleting virtual machine instance with ID: %s", id))
-
-	err := cli.Instances().Delete(ctx, id, true)
+	err := s.Client.Instances().Delete(ctx, id, true)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error deleting virtual machine: %s", err))
 		return multistep.ActionHalt

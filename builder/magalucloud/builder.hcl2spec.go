@@ -68,12 +68,12 @@ type FlatConfig struct {
 	WinRMUseSSL               *bool             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl" hcl:"winrm_use_ssl"`
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
-	Token                     *string           `mapstructure:"token" required:"true" cty:"token" hcl:"token"`
-	Region                    *Region           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
-	SourceImage               *string           `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
-	MachineType               *string           `mapstructure:"machine_type" required:"true" cty:"machine_type" hcl:"machine_type"`
-	ImageName                 *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
-	URL                       *client.MgcUrl    `mapstructure:"url" required:"false" cty:"url" hcl:"url"`
+	APIKey                    *string           `mapstructure:"api_key" cty:"api_key" hcl:"api_key"`
+	Region                    *Region           `mapstructure:"region" cty:"region" hcl:"region"`
+	SourceImage               *string           `mapstructure:"source_image" cty:"source_image" hcl:"source_image"`
+	MachineType               *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
+	ImageName                 *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
+	URL                       *client.MgcUrl    `mapstructure:"url" cty:"url" hcl:"url"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -145,7 +145,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
-		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"api_key":                      &hcldec.AttrSpec{Name: "api_key", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"source_image":                 &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
 		"machine_type":                 &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},

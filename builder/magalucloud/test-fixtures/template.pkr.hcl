@@ -1,7 +1,7 @@
 # Copyright (c) Juliano Fernandes 2026
 # SPDX-License-Identifier: MPL-2.0
 
-var "token" {
+var "api_key" {
   type      = string
   default   = "${env("MGC_API_KEY")}"
   sensitive = true
@@ -28,7 +28,7 @@ var "ssh_key" {
 }
 
 source "magalucloud" "basic" {
-  token        = var.token
+  api_key      = var.api_key
   source_image = var.source_image
   machine_type = var.machine_type
   region       = var.region

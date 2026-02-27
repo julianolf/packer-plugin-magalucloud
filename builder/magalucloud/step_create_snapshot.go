@@ -5,7 +5,9 @@ package magalucloud
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
 	"github.com/MagaluCloud/mgc-sdk-go/helpers"
@@ -13,22 +15,25 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-type StepCreateSnapshot struct{}
+type StepCreateSnapshot struct {
+	Client *compute.VirtualMachineClient
+	Config *Config
+}
 
 func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	cfg := state.Get("config").(*Config)
-	cli := state.Get("compute").(*compute.VirtualMachineClient)
 	id := state.Get("instance_id").(string)
-
-	ui.Say(fmt.Sprintf("Creating virtual machine snapshot: %s", id))
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Creating a snapshot of the virtual machine instance %s", id)
 
 	req := compute.CreateSnapshotRequest{
-		Name:     cfg.ImageName,
+		Name:     s.Config.ImageName,
 		Instance: compute.IDOrName{ID: helpers.StrPtr(id)},
 	}
 
-	id, err := cli.Snapshots().Create(ctx, req)
+	data, _ := json.Marshal(req)
+	log.Printf("[DEBUG] Create snapshot data %s", data)
+
+	id, err := s.Client.Snapshots().Create(ctx, req)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating snapshot: %s", err))
 		return multistep.ActionHalt
