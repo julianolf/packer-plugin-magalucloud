@@ -6,11 +6,10 @@ package magalucloud
 import (
 	_ "embed"
 	"fmt"
-	"io"
+	"strings"
 
 	"os"
 	"os/exec"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
@@ -38,22 +37,35 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 				}
 			}
 
-			logs, err := os.Open(logfile)
-			if err != nil {
-				return fmt.Errorf("Unable find %s", logfile)
-			}
-			defer logs.Close()
-
-			logsBytes, err := io.ReadAll(logs)
+			data, err := os.ReadFile(logfile)
 			if err != nil {
 				return fmt.Errorf("Unable to read %s", logfile)
 			}
-			logsString := string(logsBytes)
 
-			buildGeneratedDataLog := "test.magalucloud.basic: Creating virtual machine instance from: cloud-ubuntu-22.04 LTS"
-			if matched, _ := regexp.MatchString(buildGeneratedDataLog+".*", logsString); !matched {
-				t.Fatalf("logs doesn't contain expected foo value %q", logsString)
+			logs := string(data)
+			expectedLogs := []string{
+				"test.magalucloud.basic: Creating temporary ED25519 SSH key",
+				"test.magalucloud.basic: Uploading SSH key",
+				"test.magalucloud.basic: Creating virtual machine instance from cloud-ubuntu-22.04 LTS",
+				"test.magalucloud.basic: Waiting for virtual machine instance",
+				"test.magalucloud.basic: Using SSH communicator to connect",
+				"test.magalucloud.basic: Waiting for SSH to become available",
+				"test.magalucloud.basic: Connected to SSH",
+				"test.magalucloud.basic: Provisioning with shell script",
+				"test.magalucloud.basic: This is a test",
+				"test.magalucloud.basic: Stopping virtual machine instance",
+				"test.magalucloud.basic: Creating a snapshot of the virtual machine instance",
+				"test.magalucloud.basic: Waiting for snapshot",
+				"test.magalucloud.basic: Deleting virtual machine instance",
+				"test.magalucloud.basic: Deleting SSH key",
 			}
+
+			for _, expected := range expectedLogs {
+				if !strings.Contains(logs, expected) {
+					t.Fatalf("logs doesn't contain expected value %s", expected)
+				}
+			}
+
 			return nil
 		},
 	}
