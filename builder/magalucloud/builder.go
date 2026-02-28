@@ -84,6 +84,7 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 	if !ok {
 		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
 	}
+	b.config.URL = url
 
 	if b.config.AvailabilityZone == "" {
 		b.config.AvailabilityZone = fmt.Sprintf("%s-a", b.config.Region)
@@ -93,9 +94,10 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 	}
 
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	if b.config.ImageName == "" {
+		b.config.ImageName = name
+	}
 
-	b.config.URL = url
-	b.config.ImageName = name
 	b.config.Comm.SSH.SSHTemporaryKeyPairName = name
 	b.config.Comm.SSH.SSHTemporaryKeyPairType = "ed25519"
 
