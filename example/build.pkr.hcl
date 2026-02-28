@@ -10,46 +10,52 @@ packer {
   }
 }
 
-var "token" {
+variable "api_key" {
   type      = string
-  default   = "${env("MGC_API_KEY")}"
+  default   = env("MGC_API_KEY")
   sensitive = true
 }
 
-var "source_image" {
-  type    = string
-  default = "cloud-ubuntu-22.04 LTS"
-}
-
-var "machine_type" {
-  type    = string
-  default = "BV1-1-10"
-}
-
-var "region" {
+variable "region" {
   type    = string
   default = "br-se1"
 }
 
-var "ssh_key" {
+variable "source_image" {
   type    = string
-  default = "ssh-ed25519"
+  default = "cloud-ubuntu-22.04 LTS"
+}
+
+variable "machine_type" {
+  type    = string
+  default = "BV1-1-10"
+}
+
+variable "name_prefix" {
+  type    = string
+  default = "packer-example"
+}
+
+variable "ssh_username" {
+  type    = string
+  default = "ubuntu"
 }
 
 source "magalucloud" "example" {
-  token        = var.token
+  api_key      = var.api_key
+  region       = var.region
   source_image = var.source_image
   machine_type = var.machine_type
-  region       = var.region
-  ssh_key      = var.ssh_key
+  image_name   = "${var.name_prefix}-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  ssh_username = var.ssh_username
 }
 
 build {
-  name = "custom-ubuntu"
+  name = "example"
 
   sources = ["source.magalucloud.example"]
 
-  provisioner "shell-local" {
+  provisioner "shell" {
     inline = ["echo Hello Packer"]
   }
 }
