@@ -276,8 +276,8 @@ github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCV
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.10/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.11/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
-github.com/julianolf/mgc-sdk-go v0.0.0-20260225182223-0e2f493e2aa2 h1:2T55qcTKOggaW/3g1mtkYsZUKQb2OtJ4RNjT0upszrs=
-github.com/julianolf/mgc-sdk-go v0.0.0-20260225182223-0e2f493e2aa2/go.mod h1:kNVX4v1CBlkIcKxnzNcQ0jgs5Awu3Vk0Bd+vaG7GvUs=
+github.com/julianolf/mgc-sdk-go v0.0.0-20260228152731-44fd76b34397 h1:EzzoB/0hc9tmYpa7C8OTzmg141UeEwHrls66cVNopB4=
+github.com/julianolf/mgc-sdk-go v0.0.0-20260228152731-44fd76b34397/go.mod h1:kNVX4v1CBlkIcKxnzNcQ0jgs5Awu3Vk0Bd+vaG7GvUs=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/klauspost/compress v1.18.3 h1:9PJRvfbmTabkOX8moIpXPbMMbYN60bWImDDU7L+/6zw=

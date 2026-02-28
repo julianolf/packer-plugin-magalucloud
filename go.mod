@@ -162,4 +162,4 @@ require (
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
 
-replace github.com/MagaluCloud/mgc-sdk-go => github.com/julianolf/mgc-sdk-go v0.0.0-20260225182223-0e2f493e2aa2 // using a modified version with extra features
+replace github.com/MagaluCloud/mgc-sdk-go => github.com/julianolf/mgc-sdk-go v0.0.0-20260228152731-44fd76b34397 // using a modified version with extra features
