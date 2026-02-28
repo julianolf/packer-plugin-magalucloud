@@ -6,45 +6,46 @@ page_title: Magalu Cloud - Builders
 sidebar_title: Magalu Cloud
 ---
 
-# Magalu Compute Builder
+# Magalu Cloud Builder
 
 Type: `magalucloud`
 Artifact BuilderId: `julianolf.magalucloud`
 
-The `magalucloud` Packer builder is able to create
-[images](https://docs.magalu.cloud/docs/computing/images/general-overview) for use with
-Magalu Cloud [Virtual Machines](https://docs.magalu.cloud/docs/computing/virtual-machine/overview)
+The `magalucloud` Packer builder is able to create [images](https://docs.magalu.cloud/docs/computing/images/general-overview)
+for use with Magalu Cloud [Virtual Machines](https://docs.magalu.cloud/docs/computing/virtual-machine/overview)
 based on existing images.
 
-It is possible to build images from scratch, but not with the `magalucloud`
-Packer builder. The process is recommended only for advanced users, please see
-[Importing Custom Images](https://docs.magalu.cloud/docs/computing/images/import-custom-images/overview)
+It is possible to build images from scratch, but not with the `magalucloud` Packer builder.
+This process is recommended only for advanced users. Please see [Importing Custom Images](https://docs.magalu.cloud/docs/computing/images/import-custom-images/overview)
 for more information.
 
 **Required**
 
-- `token` (string) - The API token to use for authorization on Magalu Cloud.
-- `region` (string) - The region where the image will be built.
-- `source_image` (string) - The ID or name of the base image to use.
-- `machine_type` (string) - The ID or name of the machine type to use to build the image.
-- `ssh_key` (string) - The name of the SSH key to use to connect to the build instance.
+* `api_key` (string) - The API key used for authorization with Magalu Cloud.
+* `region` (string) - The region where the image will be built.
+* `source_image` (string) - The ID or name of the base image to use.
+* `machine_type` (string) - The ID or name of the machine type to use to build the image.
 
 **Optional**
 
-- `image_name` (string) - The name for the new image (default to packet-{ISO-date}).
-- `url` (string) - The API URL to interact with Magalu Cloud (default to the selected region URL).
+* `availability_zone` (string) - The availability zone where the image will be built (defaults to `{region}-a`).
+* `image_name` (string) - The name for the new image (defaults to `packer-{UUIDv4}`).
+* `url` (string) - The API URL used to interact with Magalu Cloud (defaults to the selected region URL).
 
 ### Example Usage
 
-
 ```hcl
+variable "api_key" {
+  type      = string
+  default   = env("MGC_API_KEY")
+  sensitive = true
+}
 
 source "magalucloud" "example" {
-  token        = "${env("MGC_API_KEY")}"
+  api_key      = var.api_key
+  region       = "br-se1"
   source_image = "cloud-ubuntu-22.04 LTS"
   machine_type = "BV1-1-10"
-  region       = "br-se1"
-  ssh_key      = "ssh-ed25519"
 }
 
 build {
