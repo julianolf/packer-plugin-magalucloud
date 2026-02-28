@@ -212,7 +212,7 @@ func (i *Importer) uploadImage(ctx context.Context, ui packersdk.Ui, artifact pa
 
 	ui.Sayf("Uploading %s to %s bucket", i.config.Filename, i.config.Bucket)
 
-	err = i.objectstorage.Objects().Upload(
+	err = i.objectstorage.Objects().UploadStream(
 		ctx,
 		i.config.Bucket,
 		i.config.Filename,
