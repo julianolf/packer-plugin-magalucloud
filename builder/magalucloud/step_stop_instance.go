@@ -23,7 +23,7 @@ func (s *StepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 
 	err := s.Client.Instances().Stop(ctx, id)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error stopping virtual machine: %s", err))
+		state.Put("error", fmt.Errorf("error stopping virtual machine: %s", err))
 		return multistep.ActionHalt
 	}
 

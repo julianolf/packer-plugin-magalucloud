@@ -37,15 +37,15 @@ func (s *StepWaitInstanceTeardown) Run(ctx context.Context, state multistep.Stat
 				return multistep.ActionContinue
 			}
 			if err != nil {
-				state.Put("error", fmt.Errorf("Error querying virtual machine: %s", err))
+				state.Put("error", fmt.Errorf("error querying virtual machine: %s", err))
 				return multistep.ActionHalt
 			}
 			if instance.State == "error" {
-				state.Put("error", fmt.Errorf("Virtual machine state error: %s", instance.Error.Message))
+				state.Put("error", fmt.Errorf("virtual machine state error: %s", instance.Error.Message))
 				return multistep.ActionHalt
 			}
 			if strings.Contains(instance.Status, "error") {
-				state.Put("error", fmt.Errorf("Virtual machine status error: %s", instance.Error.Message))
+				state.Put("error", fmt.Errorf("virtual machine status error: %s", instance.Error.Message))
 				return multistep.ActionHalt
 			}
 		}

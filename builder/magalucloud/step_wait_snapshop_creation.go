@@ -34,11 +34,11 @@ func (s *StepWaitSnapshotCreation) Run(ctx context.Context, state multistep.Stat
 		case <-ticker.C:
 			snapshot, err := s.Client.Snapshots().Get(ctx, id, []compute.SnapshotExpand{})
 			if err != nil {
-				state.Put("error", fmt.Errorf("Error querying snapshot: %s", err))
+				state.Put("error", fmt.Errorf("error querying snapshot: %s", err))
 				return multistep.ActionHalt
 			}
 			if strings.Contains(snapshot.Status, "error") {
-				state.Put("error", fmt.Errorf("Snapshot status error: %s", snapshot.Status))
+				state.Put("error", fmt.Errorf("snapshot status error: %s", snapshot.Status))
 				return multistep.ActionHalt
 			}
 			if snapshot.State == "available" && snapshot.Status == "completed" {

@@ -98,7 +98,7 @@ func (i *Importer) Configure(raws ...any) error {
 
 	url, ok := Regions[i.config.Region]
 	if !ok {
-		return fmt.Errorf("Invalid region: %s", i.config.Region)
+		return fmt.Errorf("invalid region: %s", i.config.Region)
 	}
 	if i.config.URL == "" {
 		i.config.URL = url.API
@@ -168,7 +168,7 @@ func findImage(artifact packersdk.Artifact) (string, error) {
 		}
 	}
 	if source == "" {
-		return "", fmt.Errorf("No %s image file found in artifact from builder", ImageFormat)
+		return "", fmt.Errorf("no %s image file found in artifact from builder", ImageFormat)
 	}
 
 	return source, nil
@@ -181,7 +181,7 @@ func validateImage(file *os.File) error {
 		return err
 	}
 	if string(header) != ImageHeader {
-		return fmt.Errorf("Invalid %s image header %s", ImageFormat, header)
+		return fmt.Errorf("invalid %s image header %s", ImageFormat, header)
 	}
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
@@ -297,7 +297,7 @@ func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string
 				return id, nil
 			case compute.ImageStatusCreating, compute.ImageStatusPending, compute.ImageStatusImporting:
 			default:
-				return "", fmt.Errorf("Invalid image status: %s", image.Status)
+				return "", fmt.Errorf("invalid image status: %s", image.Status)
 			}
 		}
 	}

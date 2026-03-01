@@ -25,7 +25,7 @@ func (s *StepDeleteSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	id := state.Get("sshkey_id").(string)
 	_, err := s.Client.Keys().Delete(ctx, id)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error deleting SSH key: %s", err))
+		state.Put("error", fmt.Errorf("error deleting ssh key: %s", err))
 		return multistep.ActionHalt
 	}
 

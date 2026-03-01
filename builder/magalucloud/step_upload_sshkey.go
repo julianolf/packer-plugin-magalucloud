@@ -34,7 +34,7 @@ func (s *StepUploadSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 
 	key, err := s.Client.Keys().Create(ctx, req)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error uploading SSH key: %s", err))
+		state.Put("error", fmt.Errorf("error uploading ssh key: %s", err))
 		return multistep.ActionHalt
 	}
 

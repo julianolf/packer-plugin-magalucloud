@@ -23,7 +23,7 @@ func (s *StepDeleteInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	err := s.Client.Instances().Delete(ctx, id, true)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error deleting virtual machine: %s", err))
+		state.Put("error", fmt.Errorf("error deleting virtual machine: %s", err))
 		return multistep.ActionHalt
 	}
 

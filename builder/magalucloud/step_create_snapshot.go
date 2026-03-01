@@ -35,7 +35,7 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 
 	id, err := s.Client.Snapshots().Create(ctx, req)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error creating snapshot: %s", err))
+		state.Put("error", fmt.Errorf("error creating snapshot: %s", err))
 		return multistep.ActionHalt
 	}
 

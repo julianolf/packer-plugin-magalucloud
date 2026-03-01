@@ -38,7 +38,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	id, err := s.Client.Instances().Create(ctx, req)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error creating virtual machine: %s", err))
+		state.Put("error", fmt.Errorf("error creating virtual machine: %s", err))
 		return multistep.ActionHalt
 	}
 

@@ -32,13 +32,13 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
 				if buildCommand.ProcessState.ExitCode() != 0 {
-					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+					return fmt.Errorf("bad exit code. logfile: %s", logfile)
 				}
 			}
 
 			data, err := os.ReadFile(logfile)
 			if err != nil {
-				return fmt.Errorf("Unable to read %s", logfile)
+				return fmt.Errorf("unable to read %s", logfile)
 			}
 
 			logs := string(data)

@@ -82,7 +82,7 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 
 	url, ok := Regions[b.config.Region]
 	if !ok {
-		return nil, nil, fmt.Errorf("Invalid region: %s", b.config.Region)
+		return nil, nil, fmt.Errorf("invalid region: %s", b.config.Region)
 	}
 	b.config.URL = url
 
@@ -90,7 +90,7 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		b.config.AvailabilityZone = fmt.Sprintf("%s-a", b.config.Region)
 	}
 	if !strings.HasPrefix(b.config.AvailabilityZone, string(b.config.Region)) {
-		return nil, nil, fmt.Errorf("Invalid availability zone: %s", b.config.AvailabilityZone)
+		return nil, nil, fmt.Errorf("invalid availability zone: %s", b.config.AvailabilityZone)
 	}
 
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
