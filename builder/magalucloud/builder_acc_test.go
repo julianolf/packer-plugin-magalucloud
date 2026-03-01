@@ -6,10 +6,9 @@ package magalucloud
 import (
 	_ "embed"
 	"fmt"
-	"strings"
-
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
