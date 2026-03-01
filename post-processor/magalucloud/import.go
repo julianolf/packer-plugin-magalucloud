@@ -205,7 +205,11 @@ func (i *Importer) uploadImage(ctx context.Context, ui packersdk.Ui, artifact pa
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Printf("[ERROR] Failed to close file %s: %s", filename, err)
+		}
+	}()
 
 	err = validateImage(file)
 	if err != nil {
