@@ -106,9 +106,17 @@ func (i *Importer) Configure(raws ...any) error {
 	if i.config.Endpoint == "" {
 		i.config.Endpoint = url.OBJ
 	}
-
 	if i.config.Expires == time.Duration(0) {
 		i.config.Expires = time.Hour
+	}
+	if i.config.Platform == "" {
+		i.config.Platform = compute.PlatformLinux
+	}
+	if i.config.Architecture == "" {
+		i.config.Architecture = compute.ArchitectureX86_64
+	}
+	if i.config.License == "" {
+		i.config.License = compute.LicenseUnlicensed
 	}
 
 	cli := client.NewMgcClient(
@@ -249,9 +257,13 @@ func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string
 		Architecture: i.config.Architecture,
 		License:      i.config.License,
 		URL:          sURL,
-		Version:      helpers.StrPtr(i.config.Version),
-		Description:  helpers.StrPtr(i.config.Description),
 		UEFI:         helpers.BoolPtr(i.config.UEFI),
+	}
+	if i.config.Version != "" {
+		req.Version = helpers.StrPtr(i.config.Version)
+	}
+	if i.config.Description != "" {
+		req.Description = helpers.StrPtr(i.config.Description)
 	}
 
 	data, _ := json.Marshal(req)
