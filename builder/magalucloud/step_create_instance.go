@@ -29,7 +29,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		MachineType:      compute.IDOrName{Name: helpers.StrPtr(s.Config.MachineType)},
 		Image:            compute.IDOrName{Name: helpers.StrPtr(s.Config.SourceImage)},
 		Network:          &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(true)},
-		SshKeyName:       helpers.StrPtr(s.Config.Comm.SSH.SSHTemporaryKeyPairName),
+		SshKeyName:       helpers.StrPtr(s.Config.Comm.SSHTemporaryKeyPairName),
 		AvailabilityZone: helpers.StrPtr(s.Config.AvailabilityZone),
 	}
 

@@ -98,8 +98,8 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		b.config.ImageName = name
 	}
 
-	b.config.Comm.SSH.SSHTemporaryKeyPairName = name
-	b.config.Comm.SSH.SSHTemporaryKeyPairType = "ed25519"
+	b.config.Comm.SSHTemporaryKeyPairName = name
+	b.config.Comm.SSHTemporaryKeyPairType = "ed25519"
 
 	b.sshkeys = sshkeys.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey)))
 	b.compute = compute.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
@@ -115,7 +115,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps := []multistep.Step{
 		&communicator.StepSSHKeyGen{
 			CommConf:            &b.config.Comm,
-			SSHTemporaryKeyPair: b.config.Comm.SSH.SSHTemporaryKeyPair,
+			SSHTemporaryKeyPair: b.config.Comm.SSHTemporaryKeyPair,
 		},
 		multistep.If(
 			b.config.PackerDebug,
