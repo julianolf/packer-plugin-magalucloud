@@ -1,9 +1,4 @@
-# This is a manually triggered action workflow.
-# It uses Packer at latest version to init, validate and build
-# an example configuration in a folder.
-# This action is compatible with Packer v1.7.0 or later.
-name: test plugin example
-
+name: Test Plugin Example
 on:
   workflow_dispatch:
     inputs:
@@ -15,33 +10,25 @@ on:
         description: 'Example folder'
         required: false
         default: './example'
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: init and build example
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
-
-      - name: Init
-        uses: hashicorp/packer-github-actions@master
-        with:
-          working_directory: ${{ github.event.inputs.folder }}
-          command: init
-
-      - name: Validate
-        uses: hashicorp/packer-github-actions@master
-        with:
-          working_directory: ${{ github.event.inputs.folder }}
-          command: validate
+        uses: actions/checkout@v6
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+      - name: Packer Init
+        run: packer init .
+        working_directory: ${{ github.event.inputs.folder }}
+      - name: Packer Validate
+        run: packer validate .
+        working_directory: ${{ github.event.inputs.folder }}
         env:
           PACKER_LOG: ${{ github.event.inputs.logs }}
-
-      - name: Build
-        uses: hashicorp/packer-github-actions@master
-        with:
-          working_directory: ${{ github.event.inputs.folder }}
-          command: build
+      - name: Packer Build
+        run: packer build .
+        working_directory: ${{ github.event.inputs.folder }}
         env:
           PACKER_LOG: ${{ github.event.inputs.logs }}
+          MGC_API_KEY: ${{ secrets.MGC_API_KEY }}
