@@ -15,4 +15,9 @@ integration {
     name = "Magalu Cloud"
     slug = "magalucloud"
   }
+  component {
+    type = "post-processor"
+    name = "Magalu Cloud Image Import"
+    slug = "magalucloud-import"
+  }
 }
