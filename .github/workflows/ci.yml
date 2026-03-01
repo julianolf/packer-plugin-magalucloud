@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Go Environment
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Run Static Analysis
+        uses: golangci/golangci-lint-action@v9
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Go Environment
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Run Tests
+        run: make test
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Go Environment
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Build and Check
+        run: make plugin-check
