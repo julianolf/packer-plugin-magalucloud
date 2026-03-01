@@ -20,15 +20,15 @@ jobs:
         uses: hashicorp/setup-packer@main
       - name: Packer Init
         run: packer init .
-        working_directory: ${{ github.event.inputs.folder }}
+        working-directory: ${{ github.event.inputs.folder }}
       - name: Packer Validate
         run: packer validate .
-        working_directory: ${{ github.event.inputs.folder }}
+        working-directory: ${{ github.event.inputs.folder }}
         env:
           PACKER_LOG: ${{ github.event.inputs.logs }}
       - name: Packer Build
         run: packer build .
-        working_directory: ${{ github.event.inputs.folder }}
+        working-directory: ${{ github.event.inputs.folder }}
         env:
           PACKER_LOG: ${{ github.event.inputs.logs }}
           MGC_API_KEY: ${{ secrets.MGC_API_KEY }}
