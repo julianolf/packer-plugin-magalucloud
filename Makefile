@@ -1,5 +1,5 @@
 NAME=magalucloud
-BINARY=packer-plugin-${NAME}
+BINARY=packer-plugin-$(NAME)
 
 COUNT?=1
 TEST?=$(shell go list ./...)
@@ -9,20 +9,20 @@ PLUGIN_FQN=$(shell grep -E '^module' <go.mod | sed -E 's/module \s*//')
 .PHONY: dev
 
 build:
-	@go build -o ${BINARY}
+	@go build -o $(BINARY)
 
 dev:
-	go build -ldflags="-X '${PLUGIN_FQN}/version.VersionPrerelease=dev'" -o ${BINARY}
-	packer plugins install --path ${BINARY} "$(shell echo "${PLUGIN_FQN}" | sed 's/packer-plugin-//')"
+	go build -ldflags="-X '$(PLUGIN_FQN)/version.VersionPrerelease=dev'" -o $(BINARY)
+	packer plugins install --path $(BINARY) "$(shell echo "$(PLUGIN_FQN)" | sed 's/packer-plugin-//')"
 
 test:
 	@go test -race -count $(COUNT) $(TEST) -timeout=5m
 
 install-packer-sdc:
-	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@${HASHICORP_PACKER_PLUGIN_SDK_VERSION}
+	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@$(HASHICORP_PACKER_PLUGIN_SDK_VERSION)
 
 plugin-check: install-packer-sdc build
-	@packer-sdc plugin-check ${BINARY}
+	@packer-sdc plugin-check $(BINARY)
 
 testacc: dev
 	@PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) -timeout=120m
