@@ -20,6 +20,8 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Setup Go Environment
         uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
       - name: Generate Docs
         shell: bash
         run: make generate
