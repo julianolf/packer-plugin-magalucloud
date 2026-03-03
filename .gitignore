@@ -1,10 +1,8 @@
-main
-packer-plugin-magalucloud
+**/*.log
+**/*.qcow2
+**/*_test.pkr.hcl
 **/packer_log*.txt
-**/git_*test.pkr.hcl
-crash.log
-dist/*
-.docs/*
-docs.zip
+.docs/
 .env
-*.qcow2
+dist/
+packer-plugin-magalucloud
