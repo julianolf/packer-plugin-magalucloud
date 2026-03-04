@@ -33,7 +33,7 @@ const (
 	ImageHeader  = "QFI\xfb"
 	ImageFormat  = "qcow2"
 	ImageFileExt = "." + ImageFormat
-	WaitInterval = 15 * time.Second
+	WaitInterval = 10 * time.Second
 )
 
 type Region string

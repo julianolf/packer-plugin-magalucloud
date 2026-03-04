@@ -28,7 +28,7 @@ import (
 
 const (
 	BuilderId    = "julianolf.magalucloud"
-	WaitInterval = 30 * time.Second
+	WaitInterval = 10 * time.Second
 )
 
 type Region string
