@@ -1,5 +1,8 @@
 # Packer Plugin Magalu Cloud
 
+[![CI](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/ci.yml)
+[![Release](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/release.yml/badge.svg)](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/release.yml)
+
 The `Magalu Cloud` multi-component plugin can be used with HashiCorp [Packer](https://www.packer.io) to create custom images.
 For the full list of available features for this plugin see [docs](docs).
 
