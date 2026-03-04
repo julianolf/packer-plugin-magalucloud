@@ -34,7 +34,7 @@ variable "name_prefix" {
   default = "packer-testacc"
 }
 
-source "file" "image" {
+source "file" "test" {
   source = "test-fixtures/image.qcow2"
   target = "test-fixtures/test.qcow2"
 }
@@ -42,7 +42,7 @@ source "file" "image" {
 build {
   name = "test"
 
-  sources = ["source.file.image"]
+  sources = ["source.file.test"]
 
   post-processor "magalucloud-import" {
     api_key    = var.api_key

@@ -14,7 +14,7 @@ variable "region" {
 
 variable "source_image" {
   type    = string
-  default = "cloud-ubuntu-22.04 LTS"
+  default = "cloud-debian-12 LTS"
 }
 
 variable "machine_type" {
@@ -29,10 +29,10 @@ variable "name_prefix" {
 
 variable "ssh_username" {
   type    = string
-  default = "ubuntu"
+  default = "debian"
 }
 
-source "magalucloud" "basic" {
+source "magalucloud" "test" {
   api_key      = var.api_key
   region       = var.region
   source_image = var.source_image
@@ -44,7 +44,7 @@ source "magalucloud" "basic" {
 build {
   name = "test"
 
-  sources = ["source.magalucloud.basic"]
+  sources = ["source.magalucloud.test"]
 
   provisioner "shell" {
     inline = ["echo This is a test"]

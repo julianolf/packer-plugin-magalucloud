@@ -43,11 +43,11 @@ func TestAccMagaluCloudImporter(t *testing.T) {
 
 			logs := string(data)
 			expectedLogs := []string{
-				"test.file.image (magalucloud-import): Uploading",
-				"test.file.image (magalucloud-import): Generating presigned URL",
-				"test.file.image (magalucloud-import): Importing image",
-				"test.file.image (magalucloud-import): Finished importing image",
-				"test.file.image (magalucloud-import): Deleting",
+				"test.file.test (magalucloud-import): Uploading",
+				"test.file.test (magalucloud-import): Generating presigned URL",
+				"test.file.test (magalucloud-import): Importing image",
+				"test.file.test (magalucloud-import): Finished importing image",
+				"test.file.test (magalucloud-import): Deleting",
 			}
 
 			for _, expected := range expectedLogs {

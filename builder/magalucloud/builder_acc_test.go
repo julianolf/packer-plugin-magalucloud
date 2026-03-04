@@ -15,7 +15,7 @@ import (
 )
 
 //go:embed test-fixtures/template.pkr.hcl
-var testBuilderHCL2Basic string
+var testBuilderHCL2 string
 
 // Run with: PACKER_ACC=1 go test -count 1 -v ./builder/magalucloud/builder_acc_test.go  -timeout=120m
 func TestAccMagaluCloudBuilder(t *testing.T) {
@@ -27,7 +27,7 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 		Teardown: func() error {
 			return nil
 		},
-		Template: testBuilderHCL2Basic,
+		Template: testBuilderHCL2,
 		Type:     "magalucloud",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
@@ -43,20 +43,20 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 
 			logs := string(data)
 			expectedLogs := []string{
-				"test.magalucloud.basic: Creating temporary ED25519 SSH key",
-				"test.magalucloud.basic: Uploading SSH key",
-				"test.magalucloud.basic: Creating virtual machine instance from cloud-ubuntu-22.04 LTS",
-				"test.magalucloud.basic: Waiting for virtual machine instance",
-				"test.magalucloud.basic: Using SSH communicator to connect",
-				"test.magalucloud.basic: Waiting for SSH to become available",
-				"test.magalucloud.basic: Connected to SSH",
-				"test.magalucloud.basic: Provisioning with shell script",
-				"test.magalucloud.basic: This is a test",
-				"test.magalucloud.basic: Stopping virtual machine instance",
-				"test.magalucloud.basic: Creating a snapshot of the virtual machine instance",
-				"test.magalucloud.basic: Waiting for snapshot",
-				"test.magalucloud.basic: Deleting virtual machine instance",
-				"test.magalucloud.basic: Deleting SSH key",
+				"test.magalucloud.test: Creating temporary ED25519 SSH key",
+				"test.magalucloud.test: Uploading SSH key",
+				"test.magalucloud.test: Creating virtual machine instance from cloud-debian-12 LTS",
+				"test.magalucloud.test: Waiting for virtual machine instance",
+				"test.magalucloud.test: Using SSH communicator to connect",
+				"test.magalucloud.test: Waiting for SSH to become available",
+				"test.magalucloud.test: Connected to SSH",
+				"test.magalucloud.test: Provisioning with shell script",
+				"test.magalucloud.test: This is a test",
+				"test.magalucloud.test: Stopping virtual machine instance",
+				"test.magalucloud.test: Creating a snapshot of the virtual machine instance",
+				"test.magalucloud.test: Waiting for snapshot",
+				"test.magalucloud.test: Deleting virtual machine instance",
+				"test.magalucloud.test: Deleting SSH key",
 			}
 
 			for _, expected := range expectedLogs {
