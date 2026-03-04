@@ -33,12 +33,12 @@ test:
 	@go test -race -count $(COUNT) $(TEST) -timeout=5m
 
 $(IMAGE_FILE):
-	@curl -L $(IMAGE_URL) -o $@
+	@curl -sL $(IMAGE_URL) -o $@
 
 tools:
 	@go install $(PACKER_SDC)
 
-testacc: $(IMAGE_FILE) dev
+testacc: $(IMAGE_FILE) tools dev
 	@PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) -timeout=120m
 
 plugin-check: tools build
