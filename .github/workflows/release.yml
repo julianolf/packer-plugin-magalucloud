@@ -43,9 +43,9 @@ jobs:
       - name: Describe Plugin
         id: describe_plugin
         run: |
-          go run . describe > info.json
-          echo "version=$(jq -r '.version' info.json)" >> $GITHUB_OUTPUT
-          echo "api_version=$(jq -r '.api_version' info.json)" >> $GITHUB_OUTPUT
+          go run . describe >"$RUNNER_TEMP/info.json"
+          echo "version=$(jq -r '.version' "$RUNNER_TEMP/info.json")" >>"$GITHUB_OUTPUT"
+          echo "api_version=$(jq -r '.api_version' "$RUNNER_TEMP/info.json")" >>"$GITHUB_OUTPUT"
       - name: Import GPG Key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v6
