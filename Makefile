@@ -1,35 +1,58 @@
+ifneq (,$(wildcard .env))
+include .env
+export
+endif
+
 NAME=magalucloud
 BINARY=packer-plugin-$(NAME)
 
 COUNT?=1
 TEST?=$(shell go list ./...)
-HASHICORP_PACKER_PLUGIN_SDK_VERSION?=$(shell go list -m github.com/hashicorp/packer-plugin-sdk | cut -d " " -f2)
+
+PACKER_SDK=github.com/hashicorp/packer-plugin-sdk
+PACKER_SDK_VERSION?=$(shell go list -m $(PACKER_SDK) | cut -d " " -f2)
+PACKER_SDC=$(PACKER_SDK)/cmd/packer-sdc@$(PACKER_SDK_VERSION)
 PLUGIN_FQN=$(shell grep -E '^module' <go.mod | sed -E 's/module \s*//')
 
-.PHONY: dev
+IMAGE_URL?=
+IMAGE_FILE=$(shell pwd)/post-processor/magalucloud/test-fixtures/image.qcow2
+
+.PHONY: dev docs env
 
 build:
 	@go build -o $(BINARY)
 
-dev:
+gen:
+	@go generate ./...
+
+dev: gen
 	go build -ldflags="-X '$(PLUGIN_FQN)/version.VersionPrerelease=dev'" -o $(BINARY)
 	packer plugins install --path $(BINARY) "$(shell echo "$(PLUGIN_FQN)" | sed 's/packer-plugin-//')"
 
 test:
 	@go test -race -count $(COUNT) $(TEST) -timeout=5m
 
-install-packer-sdc:
-	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@$(HASHICORP_PACKER_PLUGIN_SDK_VERSION)
+$(IMAGE_FILE):
+	@curl -L $(IMAGE_URL) -o $@
 
-plugin-check: install-packer-sdc build
-	@packer-sdc plugin-check $(BINARY)
+tools:
+	@go install $(PACKER_SDC)
 
-testacc: dev
+testacc: $(IMAGE_FILE) dev
 	@PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) -timeout=120m
 
-generate: install-packer-sdc
-	@go generate ./...
-	@rm -rf .docs
+plugin-check: tools build
+	@packer-sdc plugin-check $(BINARY)
+
+.env:
+	@cp .env.example $@
+
+env: .env tools
+
+docs: tools
+	@rm -rf .docs/
 	@packer-sdc renderdocs -src docs -partials docs-partials/ -dst .docs/
 	@./.web-docs/scripts/compile-to-webdocs.sh "." ".docs" ".web-docs" "julianolf"
-	@rm -r ".docs"
+
+clean:
+	@rm -rf .docs/ packer-plugin-magalucloud .coverage* coverage.*
