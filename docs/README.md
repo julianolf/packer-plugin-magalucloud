@@ -8,7 +8,7 @@ packer {
   required_plugins {
     name = {
       source  = "github.com/julianolf/magalucloud"
-      version = ">= 0.0.1"
+      version = ">= 0.1.0"
     }
   }
 }
