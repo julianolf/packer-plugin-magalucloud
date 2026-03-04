@@ -23,7 +23,7 @@ variable "region" {
 
 variable "source_image" {
   type    = string
-  default = "cloud-ubuntu-22.04 LTS"
+  default = "cloud-debian-12 LTS"
 }
 
 variable "machine_type" {
@@ -38,7 +38,7 @@ variable "name_prefix" {
 
 variable "ssh_username" {
   type    = string
-  default = "ubuntu"
+  default = "debian"
 }
 
 source "magalucloud" "example" {
