@@ -1,0 +1,27 @@
+name: Validate Release
+on:
+  release:
+    types:
+      - published
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Go Environment
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+      - name: Run Acceptance Tests
+        run: make testacc
+        env:
+          MGC_API_KEY: ${{ secrets.MGC_API_KEY }}
+          MGC_ACCESS_KEY: ${{ secrets.MGC_ACCESS_KEY }}
+          MGC_SECRET_KEY: ${{ secrets.MGC_SECRET_KEY }}
+          BUCKET: ${{ secrets.BUCKET }}
+          IMAGE_URL: ${{ secrets.IMAGE_URL }}
