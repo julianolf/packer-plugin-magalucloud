@@ -24,7 +24,7 @@ jobs:
           go-version-file: go.mod
       - name: Generate Docs
         shell: bash
-        run: make generate
+        run: make docs
       - name: Check Docs
         shell: bash
         run: |
@@ -32,7 +32,7 @@ jobs:
             echo "OK"
           else
             echo "Docs have been updated, but the compiled docs have not been committed."
-            echo "Run 'make generate', and commit the result to resolve this error."
+            echo "Run 'make docs', and commit the result to resolve this error."
             exit 1
           fi
       - name: Checkout integration-release-action
