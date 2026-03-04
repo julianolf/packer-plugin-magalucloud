@@ -75,15 +75,15 @@ variable "secret_key" {
   sensitive = true
 }
 
-source "file" "ubuntu" {
-  source = "${path.root}/jammy-server-cloudimg-amd64-disk-kvm.img"
-  target = "ubuntu-22.04-lts-amd64.qcow2"
+source "file" "example" {
+  source = "debian.qcow2"
+  target = "image.qcow2"
 }
 
 build {
-  name = "custom-ubuntu"
+  name = "example"
 
-  sources = ["source.file.ubuntu"]
+  sources = ["source.file.example"]
 
   post-processor "magalucloud-import" {
     api_key    = var.api_key
@@ -91,7 +91,7 @@ build {
     secret_key = var.secret_key
     region     = "br-se1"
     bucket     = "custom-images"
-    image_name = "ubuntu-22_04"
+    image_name = "custom-debian"
   }
 }
 ```

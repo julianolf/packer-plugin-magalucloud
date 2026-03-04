@@ -44,12 +44,12 @@ variable "api_key" {
 source "magalucloud" "example" {
   api_key      = var.api_key
   region       = "br-se1"
-  source_image = "cloud-ubuntu-22.04 LTS"
+  source_image = "cloud-debian-12 LTS"
   machine_type = "BV1-1-10"
 }
 
 build {
-  name = "custom-ubuntu"
+  name = "example"
 
   sources = ["source.magalucloud.example"]
 }
