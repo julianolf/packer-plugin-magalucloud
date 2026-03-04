@@ -55,7 +55,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
-          version: latest
+          version: '~> v2'
           args: release --clean --timeout 120m
         env:
           API_VERSION: ${{ steps.describe_plugin.outputs.api_version }}
