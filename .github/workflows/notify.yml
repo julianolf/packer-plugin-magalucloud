@@ -1,0 +1,46 @@
+name: Notify Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The release version (semver *.*.*)"
+        required: true
+      branch:
+        description: "A branch or SHA"
+        default: 'main'
+        required: false
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: Setup Go Environment
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Generate Docs
+        run: make docs
+      - name: Check Docs
+        run: |
+          if [[ -z "$(git status -s)" ]]; then
+            echo "OK"
+          else
+            echo "Docs have been updated, but the compiled docs have not been committed."
+            echo "Run 'make docs', and commit the result to resolve this error."
+            exit 1
+          fi
+      - name: Checkout integration-release-action
+        uses: actions/checkout@v6
+        with:
+          repository: hashicorp/integration-release-action
+          path: ./integration-release-action
+      - name: Notify Release
+        uses: ./integration-release-action
+        with:
+          integration_identifier: "packer/julianolf/magalucloud"
+          release_version: ${{ github.event.inputs.version }}
+          release_sha: ${{ github.event.inputs.branch }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
