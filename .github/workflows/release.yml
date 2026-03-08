@@ -48,7 +48,7 @@ jobs:
           echo "api_version=$(jq -r '.api_version' "$RUNNER_TEMP/info.json")" >>"$GITHUB_OUTPUT"
       - name: Import GPG Key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
