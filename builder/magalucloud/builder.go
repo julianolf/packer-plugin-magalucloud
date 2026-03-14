@@ -52,6 +52,13 @@ type Config struct {
 	ctx interpolate.Context
 }
 
+func (c *Config) WinRMConfigFunc(state multistep.StateBag) (*communicator.WinRMConfig, error) {
+	return &communicator.WinRMConfig{
+		Username: c.Comm.WinRMUser,
+		Password: c.Comm.WinRMPassword,
+	}, nil
+}
+
 type Builder struct {
 	config  Config
 	runner  multistep.Runner
@@ -113,20 +120,27 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&communicator.StepSSHKeyGen{
-			CommConf:            &b.config.Comm,
-			SSHTemporaryKeyPair: b.config.Comm.SSHTemporaryKeyPair,
-		},
 		multistep.If(
-			b.config.PackerDebug,
+			b.config.Comm.Type == "ssh",
+			&communicator.StepSSHKeyGen{
+				CommConf:            &b.config.Comm,
+				SSHTemporaryKeyPair: b.config.Comm.SSHTemporaryKeyPair,
+			},
+		),
+		multistep.If(
+			b.config.PackerDebug && b.config.Comm.Type == "ssh",
 			&communicator.StepDumpSSHKey{
 				Path: fmt.Sprintf("mgc_%s.pem", b.config.PackerBuildName),
 				SSH:  &b.config.Comm.SSH,
-			}),
-		&StepUploadSSHKey{
-			Client: b.sshkeys,
-			SSH:    &b.config.Comm.SSH,
-		},
+			},
+		),
+		multistep.If(
+			b.config.Comm.Type == "ssh",
+			&StepUploadSSHKey{
+				Client: b.sshkeys,
+				SSH:    &b.config.Comm.SSH,
+			},
+		),
 		&StepCreateInstance{
 			Client: b.compute,
 			Config: &b.config,
@@ -134,10 +148,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepWaitInstanceBoot{
 			Client: b.compute,
 		},
+		multistep.If(
+			b.config.Comm.Type == "winrm",
+			&StepGetWindowsPassword{
+				Client: b.compute,
+				WinRM:  &b.config.Comm.WinRM,
+			},
+		),
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
-			SSHConfig: b.config.Comm.SSHConfigFunc(),
+			Config:      &b.config.Comm,
+			Host:        communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
+			SSHConfig:   b.config.Comm.SSHConfigFunc(),
+			WinRMConfig: b.config.WinRMConfigFunc,
 		},
 		&commonsteps.StepProvision{},
 		&StepStopInstance{
@@ -159,10 +181,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepWaitInstanceTeardown{
 			Client: b.compute,
 		},
-		&StepDeleteSSHKey{
-			Client: b.sshkeys,
-			SSH:    &b.config.Comm.SSH,
-		},
+		multistep.If(
+			b.config.Comm.Type == "ssh",
+			&StepDeleteSSHKey{
+				Client: b.sshkeys,
+				SSH:    &b.config.Comm.SSH,
+			},
+		),
 	}
 
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
