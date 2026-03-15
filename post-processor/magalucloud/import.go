@@ -145,7 +145,7 @@ func (i *Importer) PostProcess(ctx context.Context, ui packersdk.Ui, artifact pa
 		return nil, false, false, err
 	}
 
-	_, err = i.importImage(ctx, ui, sURL)
+	image_id, err := i.importImage(ctx, ui, sURL)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -155,7 +155,12 @@ func (i *Importer) PostProcess(ctx context.Context, ui packersdk.Ui, artifact pa
 		return nil, false, false, err
 	}
 
-	return artifact, true, true, nil
+	newArtifact := &Artifact{
+		ID:        image_id,
+		Region:    i.config.Region,
+		StateData: map[string]any{},
+	}
+	return newArtifact, false, false, nil
 }
 
 func findImage(artifact packersdk.Artifact) (string, error) {
