@@ -3,7 +3,11 @@
 
 package magalucloud
 
+import "fmt"
+
 type Artifact struct {
+	ID        string
+	Region    Region
 	StateData map[string]any
 }
 
@@ -15,12 +19,12 @@ func (a *Artifact) Files() []string {
 	return []string{}
 }
 
-func (*Artifact) Id() string {
-	return ""
+func (a *Artifact) Id() string {
+	return fmt.Sprintf("%s:%s", a.Region, a.ID)
 }
 
 func (a *Artifact) String() string {
-	return ""
+	return fmt.Sprintf("A snapshot was created in the '%s' region: %s", a.Region, a.ID)
 }
 
 func (a *Artifact) State(name string) any {

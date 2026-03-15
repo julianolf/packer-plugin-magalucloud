@@ -197,6 +197,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err.(error)
 	}
 
-	artifact := &Artifact{StateData: map[string]any{}}
+	snapshot_id := state.Get("snapshot_id").(string)
+	artifact := &Artifact{
+		ID:        snapshot_id,
+		Region:    b.config.Region,
+		StateData: map[string]any{},
+	}
 	return artifact, nil
 }
