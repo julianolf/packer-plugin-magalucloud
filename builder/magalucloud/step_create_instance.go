@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
 	"github.com/MagaluCloud/mgc-sdk-go/helpers"
@@ -56,4 +58,52 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateInstance) Cleanup(_ multistep.StateBag) {}
+func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
+	v, ok := state.GetOk("instance_id")
+	if !ok {
+		return
+	}
+
+	id := v.(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Deleting virtual machine instance %s", id)
+
+	err := s.Client.Instances().Delete(context.Background(), id, true)
+	if err != nil {
+		ui.Errorf("Error deleting virtual machine: %s", err)
+		return
+	}
+
+	ui.Sayf("Waiting for virtual machine instance %s teardown", id)
+
+	ticker := time.NewTicker(WaitInterval)
+	defer ticker.Stop()
+
+	timeout := time.NewTimer(TimeoutInterval)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-timeout.C:
+			ui.Errorf("Delete virtual machine %s timed out", id)
+			return
+		case <-ticker.C:
+			instance, err := s.Client.Instances().Get(context.Background(), id, []compute.InstanceExpand{})
+			if err != nil && strings.Contains(err.Error(), "404") {
+				return
+			}
+			if err != nil {
+				ui.Errorf("Error querying virtual machine: %s", err)
+				return
+			}
+			if instance.State == "error" {
+				ui.Errorf("Virtual machine state error: %s", instance.Error.Message)
+				return
+			}
+			if strings.Contains(instance.Status, "error") {
+				ui.Errorf("Virtual machine status error: %s", instance.Error.Message)
+				return
+			}
+		}
+	}
+}

@@ -28,8 +28,9 @@ import (
 )
 
 const (
-	BuilderId    = "julianolf.magalucloud"
-	WaitInterval = 10 * time.Second
+	BuilderId       = "julianolf.magalucloud"
+	WaitInterval    = 10 * time.Second
+	TimeoutInterval = 10 * time.Minute
 )
 
 type Region string
@@ -184,22 +185,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepWaitSnapshotCreation{
 			Client: b.compute,
 		},
-		&StepDeleteInstance{
-			Client: b.compute,
-		},
-		&StepWaitInstanceTeardown{
-			Client: b.compute,
-		},
-		&StepDeleteSecurityGroup{
-			Client: b.network,
-		},
-		multistep.If(
-			b.config.Comm.Type == "ssh",
-			&StepDeleteSSHKey{
-				Client: b.sshkeys,
-				SSH:    &b.config.Comm.SSH,
-			},
-		),
 	}
 
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)

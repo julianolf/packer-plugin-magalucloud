@@ -111,4 +111,18 @@ func (s *StepCreateSecurityGroup) Run(ctx context.Context, state multistep.State
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateSecurityGroup) Cleanup(_ multistep.StateBag) {}
+func (s *StepCreateSecurityGroup) Cleanup(state multistep.StateBag) {
+	v, ok := state.GetOk("security_group_id")
+	if !ok {
+		return
+	}
+
+	id := v.(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Deleting security group %s", id)
+
+	err := s.Client.SecurityGroups().Delete(context.Background(), id)
+	if err != nil {
+		ui.Errorf("Error deleting security group: %s", err)
+	}
+}

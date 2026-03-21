@@ -42,4 +42,18 @@ func (s *StepUploadSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	return multistep.ActionContinue
 }
 
-func (s *StepUploadSSHKey) Cleanup(_ multistep.StateBag) {}
+func (s *StepUploadSSHKey) Cleanup(state multistep.StateBag) {
+	v, ok := state.GetOk("sshkey_id")
+	if !ok {
+		return
+	}
+
+	id := v.(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Sayf("Deleting SSH key %s", s.SSH.SSHTemporaryKeyPairName)
+
+	_, err := s.Client.Keys().Delete(context.Background(), id)
+	if err != nil {
+		ui.Errorf("Error deleting SSH key: %s", err)
+	}
+}
