@@ -14,6 +14,7 @@ import (
 
 	"github.com/MagaluCloud/mgc-sdk-go/client"
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
+	"github.com/MagaluCloud/mgc-sdk-go/network"
 	"github.com/MagaluCloud/mgc-sdk-go/sshkeys"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -49,7 +50,8 @@ type Config struct {
 	ImageName           string              `mapstructure:"image_name"`
 	URL                 client.MgcUrl       `mapstructure:"url"`
 
-	ctx interpolate.Context
+	uname string
+	ctx   interpolate.Context
 }
 
 func (c *Config) WinRMConfigFunc(state multistep.StateBag) (*communicator.WinRMConfig, error) {
@@ -64,6 +66,7 @@ type Builder struct {
 	runner  multistep.Runner
 	sshkeys *sshkeys.SSHKeyClient
 	compute *compute.VirtualMachineClient
+	network *network.NetworkClient
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec {
@@ -100,16 +103,18 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		return nil, nil, fmt.Errorf("invalid availability zone: %s", b.config.AvailabilityZone)
 	}
 
-	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	b.config.uname = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+
 	if b.config.ImageName == "" {
-		b.config.ImageName = name
+		b.config.ImageName = b.config.uname
 	}
 
-	b.config.Comm.SSHTemporaryKeyPairName = name
+	b.config.Comm.SSHTemporaryKeyPairName = b.config.uname
 	b.config.Comm.SSHTemporaryKeyPairType = "ed25519"
 
 	b.sshkeys = sshkeys.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey)))
 	b.compute = compute.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
+	b.network = network.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
 
 	return nil, nil, nil
 }
@@ -141,6 +146,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				SSH:    &b.config.Comm.SSH,
 			},
 		),
+		&StepCreateSecurityGroup{
+			Client: b.network,
+			Config: &b.config,
+		},
 		&StepCreateInstance{
 			Client: b.compute,
 			Config: &b.config,
@@ -180,6 +189,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepWaitInstanceTeardown{
 			Client: b.compute,
+		},
+		&StepDeleteSecurityGroup{
+			Client: b.network,
 		},
 		multistep.If(
 			b.config.Comm.Type == "ssh",

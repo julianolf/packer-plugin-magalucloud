@@ -21,6 +21,7 @@ type StepCreateInstance struct {
 }
 
 func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	sg := state.Get("security_group_id").(string)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Sayf("Creating virtual machine instance from %s", s.Config.SourceImage)
 
@@ -28,8 +29,15 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		Name:             s.Config.ImageName,
 		MachineType:      compute.IDOrName{Name: helpers.StrPtr(s.Config.MachineType)},
 		Image:            compute.IDOrName{Name: helpers.StrPtr(s.Config.SourceImage)},
-		Network:          &compute.CreateParametersNetwork{AssociatePublicIp: helpers.BoolPtr(true)},
 		AvailabilityZone: helpers.StrPtr(s.Config.AvailabilityZone),
+		Network: &compute.CreateParametersNetwork{
+			AssociatePublicIp: helpers.BoolPtr(true),
+			Interface: &compute.CreateParametersNetworkInterface{
+				SecurityGroups: &[]compute.CreateParametersNetworkInterfaceWithID{
+					{ID: sg},
+				},
+			},
+		},
 	}
 	if s.Config.Comm.Type == "ssh" {
 		req.SshKeyName = helpers.StrPtr(s.Config.Comm.SSHTemporaryKeyPairName)
