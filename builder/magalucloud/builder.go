@@ -155,9 +155,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Client: b.compute,
 			Config: &b.config,
 		},
-		&StepWaitInstanceBoot{
-			Client: b.compute,
-		},
 		multistep.If(
 			b.config.Comm.Type == "winrm",
 			&StepGetWindowsPassword{
@@ -175,15 +172,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepStopInstance{
 			Client: b.compute,
 		},
-		&StepWaitInstanceStop{
-			Client: b.compute,
-		},
 		&StepCreateSnapshot{
 			Client: b.compute,
 			Config: &b.config,
-		},
-		&StepWaitSnapshotCreation{
-			Client: b.compute,
 		},
 	}
 

@@ -55,7 +55,47 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	}
 
 	state.Put("instance_id", id)
-	return multistep.ActionContinue
+
+	ui.Sayf("Waiting for virtual machine instance %s boot", id)
+
+	ticker := time.NewTicker(WaitInterval)
+	defer ticker.Stop()
+
+	timeout := time.NewTimer(TimeoutInterval)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			state.Put("error", ctx.Err())
+			return multistep.ActionHalt
+		case <-timeout.C:
+			state.Put("error", fmt.Errorf("delete virtual machine %s timed out after: %s", id, TimeoutInterval))
+			return multistep.ActionHalt
+		case <-ticker.C:
+			instance, err := s.Client.Instances().Get(ctx, id, []compute.InstanceExpand{compute.InstanceNetworkExpand})
+			if err != nil {
+				state.Put("error", fmt.Errorf("error querying virtual machine: %s", err))
+				return multistep.ActionHalt
+			}
+			if instance.State == "error" {
+				state.Put("error", fmt.Errorf("virtual machine state error: %s", instance.Error.Message))
+				return multistep.ActionHalt
+			}
+			if strings.Contains(instance.Status, "error") {
+				state.Put("error", fmt.Errorf("virtual machine status error: %s", instance.Error.Message))
+				return multistep.ActionHalt
+			}
+			if instance.State == "running" && instance.Status == "completed" {
+				ip := (*instance.Network.Interfaces)[0].AssociatedPublicIpv4
+				if ip == nil {
+					continue
+				}
+				state.Put("instance_ip", *ip)
+				return multistep.ActionContinue
+			}
+		}
+	}
 }
 
 func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
