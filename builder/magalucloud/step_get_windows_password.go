@@ -11,14 +11,13 @@ import (
 	"time"
 
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
-	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepGetWindowsPassword struct {
 	Client *compute.VirtualMachineClient
-	WinRM  *communicator.WinRM
+	Config *Config
 }
 
 func (s *StepGetWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -29,10 +28,16 @@ func (s *StepGetWindowsPassword) Run(ctx context.Context, state multistep.StateB
 	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
+	timeout := time.NewTimer(s.Config.WaitTimeout)
+	defer timeout.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			state.Put("error", ctx.Err())
+			return multistep.ActionHalt
+		case <-timeout.C:
+			state.Put("error", fmt.Errorf("retrieve windows password timed out after: %s", s.Config.WaitTimeout))
 			return multistep.ActionHalt
 		case <-ticker.C:
 			res, err := s.Client.Instances().GetFirstWindowsPassword(ctx, id)
@@ -41,16 +46,16 @@ func (s *StepGetWindowsPassword) Run(ctx context.Context, state multistep.StateB
 				return multistep.ActionHalt
 			}
 			if err == nil {
-				if s.WinRM.WinRMUser == "" {
-					s.WinRM.WinRMUser = res.Instance.User
+				if s.Config.Comm.WinRMUser == "" {
+					s.Config.Comm.WinRMUser = res.Instance.User
 				}
-				if s.WinRM.WinRMUser != res.Instance.User {
-					state.Put("error", fmt.Errorf("winrm_username mismatch: %s != %s", s.WinRM.WinRMUser, res.Instance.User))
+				if s.Config.Comm.WinRMUser != res.Instance.User {
+					state.Put("error", fmt.Errorf("winrm_username mismatch: %s != %s", s.Config.Comm.WinRMUser, res.Instance.User))
 					return multistep.ActionHalt
 				}
 
-				s.WinRM.WinRMPassword = res.Instance.Password
-				log.Printf("[DEBUG] Username: %s Password: %s", s.WinRM.WinRMUser, s.WinRM.WinRMPassword)
+				s.Config.Comm.WinRMPassword = res.Instance.Password
+				log.Printf("[DEBUG] Username: %s Password: %s", s.Config.Comm.WinRMUser, s.Config.Comm.WinRMPassword)
 
 				return multistep.ActionContinue
 			}

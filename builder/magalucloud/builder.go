@@ -164,7 +164,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			b.config.Comm.Type == "winrm",
 			&StepGetWindowsPassword{
 				Client: b.compute,
-				WinRM:  &b.config.Comm.WinRM,
+				Config: &b.config,
 			},
 		),
 		&communicator.StepConnect{
