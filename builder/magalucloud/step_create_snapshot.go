@@ -48,7 +48,7 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
-	timeout := time.NewTimer(TimeoutInterval)
+	timeout := time.NewTimer(s.Config.WaitTimeout)
 	defer timeout.Stop()
 
 	for {
@@ -57,7 +57,7 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-timeout.C:
-			state.Put("error", fmt.Errorf("create snapshot %s timed out after: %s", id, TimeoutInterval))
+			state.Put("error", fmt.Errorf("create snapshot %s timed out after: %s", id, s.Config.WaitTimeout))
 			return multistep.ActionHalt
 		case <-ticker.C:
 			snapshot, err := s.Client.Snapshots().Get(ctx, id, []compute.SnapshotExpand{})

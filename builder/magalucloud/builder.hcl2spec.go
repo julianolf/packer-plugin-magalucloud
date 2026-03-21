@@ -75,6 +75,7 @@ type FlatConfig struct {
 	MachineType               *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
 	ImageName                 *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
 	URL                       *client.MgcUrl    `mapstructure:"url" cty:"url" hcl:"url"`
+	WaitTimeout               *string           `mapstructure:"wait_timeout" cty:"wait_timeout" hcl:"wait_timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -153,6 +154,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"machine_type":                 &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"url":                          &hcldec.AttrSpec{Name: "url", Type: cty.String, Required: false},
+		"wait_timeout":                 &hcldec.AttrSpec{Name: "wait_timeout", Type: cty.String, Required: false},
 	}
 	return s
 }

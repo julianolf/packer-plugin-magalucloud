@@ -16,6 +16,7 @@ import (
 
 type StepStopInstance struct {
 	Client *compute.VirtualMachineClient
+	Config *Config
 }
 
 func (s *StepStopInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -34,7 +35,7 @@ func (s *StepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
-	timeout := time.NewTimer(TimeoutInterval)
+	timeout := time.NewTimer(s.Config.WaitTimeout)
 	defer timeout.Stop()
 
 	for {
@@ -43,7 +44,7 @@ func (s *StepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-timeout.C:
-			state.Put("error", fmt.Errorf("stop virtual machine %s timed out after: %s", id, TimeoutInterval))
+			state.Put("error", fmt.Errorf("stop virtual machine %s timed out after: %s", id, s.Config.WaitTimeout))
 			return multistep.ActionHalt
 		case <-ticker.C:
 			instance, err := s.Client.Instances().Get(ctx, id, []compute.InstanceExpand{})

@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	BuilderId       = "julianolf.magalucloud"
-	WaitInterval    = 10 * time.Second
-	TimeoutInterval = 10 * time.Minute
+	BuilderId      = "julianolf.magalucloud"
+	WaitInterval   = 10 * time.Second
+	DefaultTimeout = 10 * time.Minute
 )
 
 type Region string
@@ -50,6 +50,7 @@ type Config struct {
 	MachineType         string              `mapstructure:"machine_type"`
 	ImageName           string              `mapstructure:"image_name"`
 	URL                 client.MgcUrl       `mapstructure:"url"`
+	WaitTimeout         time.Duration       `mapstructure:"wait_timeout"`
 
 	uname string
 	ctx   interpolate.Context
@@ -102,6 +103,10 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 	}
 	if !strings.HasPrefix(b.config.AvailabilityZone, string(b.config.Region)) {
 		return nil, nil, fmt.Errorf("invalid availability zone: %s", b.config.AvailabilityZone)
+	}
+
+	if b.config.WaitTimeout == time.Duration(0) {
+		b.config.WaitTimeout = DefaultTimeout
 	}
 
 	b.config.uname = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
@@ -171,6 +176,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&commonsteps.StepProvision{},
 		&StepStopInstance{
 			Client: b.compute,
+			Config: &b.config,
 		},
 		&StepCreateSnapshot{
 			Client: b.compute,

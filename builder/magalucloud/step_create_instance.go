@@ -61,7 +61,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
-	timeout := time.NewTimer(TimeoutInterval)
+	timeout := time.NewTimer(s.Config.WaitTimeout)
 	defer timeout.Stop()
 
 	for {
@@ -70,7 +70,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			state.Put("error", ctx.Err())
 			return multistep.ActionHalt
 		case <-timeout.C:
-			state.Put("error", fmt.Errorf("delete virtual machine %s timed out after: %s", id, TimeoutInterval))
+			state.Put("error", fmt.Errorf("delete virtual machine %s timed out after: %s", id, s.Config.WaitTimeout))
 			return multistep.ActionHalt
 		case <-ticker.C:
 			instance, err := s.Client.Instances().Get(ctx, id, []compute.InstanceExpand{compute.InstanceNetworkExpand})
@@ -119,13 +119,13 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	ticker := time.NewTicker(WaitInterval)
 	defer ticker.Stop()
 
-	timeout := time.NewTimer(TimeoutInterval)
+	timeout := time.NewTimer(s.Config.WaitTimeout)
 	defer timeout.Stop()
 
 	for {
 		select {
 		case <-timeout.C:
-			ui.Errorf("Delete virtual machine %s timed out", id)
+			ui.Errorf("Delete virtual machine %s timed out after: %s", id, s.Config.WaitTimeout)
 			return
 		case <-ticker.C:
 			instance, err := s.Client.Instances().Get(context.Background(), id, []compute.InstanceExpand{})
