@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
 	"github.com/MagaluCloud/mgc-sdk-go/helpers"
@@ -40,7 +42,38 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 	}
 
 	state.Put("snapshot_id", id)
-	return multistep.ActionContinue
+
+	ui.Sayf("Waiting for snapshot %s creation", id)
+
+	ticker := time.NewTicker(WaitInterval)
+	defer ticker.Stop()
+
+	timeout := time.NewTimer(s.Config.WaitTimeout)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			state.Put("error", ctx.Err())
+			return multistep.ActionHalt
+		case <-timeout.C:
+			state.Put("error", fmt.Errorf("create snapshot %s timed out after: %s", id, s.Config.WaitTimeout))
+			return multistep.ActionHalt
+		case <-ticker.C:
+			snapshot, err := s.Client.Snapshots().Get(ctx, id, []compute.SnapshotExpand{})
+			if err != nil {
+				state.Put("error", fmt.Errorf("error querying snapshot: %s", err))
+				return multistep.ActionHalt
+			}
+			if strings.Contains(snapshot.Status, "error") {
+				state.Put("error", fmt.Errorf("snapshot status error: %s", snapshot.Status))
+				return multistep.ActionHalt
+			}
+			if snapshot.State == "available" && snapshot.Status == "completed" {
+				return multistep.ActionContinue
+			}
+		}
+	}
 }
 
 func (s *StepCreateSnapshot) Cleanup(_ multistep.StateBag) {}

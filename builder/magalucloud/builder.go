@@ -14,6 +14,7 @@ import (
 
 	"github.com/MagaluCloud/mgc-sdk-go/client"
 	"github.com/MagaluCloud/mgc-sdk-go/compute"
+	"github.com/MagaluCloud/mgc-sdk-go/network"
 	"github.com/MagaluCloud/mgc-sdk-go/sshkeys"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -27,8 +28,9 @@ import (
 )
 
 const (
-	BuilderId    = "julianolf.magalucloud"
-	WaitInterval = 10 * time.Second
+	BuilderId      = "julianolf.magalucloud"
+	WaitInterval   = 10 * time.Second
+	DefaultTimeout = 10 * time.Minute
 )
 
 type Region string
@@ -48,8 +50,17 @@ type Config struct {
 	MachineType         string              `mapstructure:"machine_type"`
 	ImageName           string              `mapstructure:"image_name"`
 	URL                 client.MgcUrl       `mapstructure:"url"`
+	WaitTimeout         time.Duration       `mapstructure:"wait_timeout"`
 
-	ctx interpolate.Context
+	uname string
+	ctx   interpolate.Context
+}
+
+func (c *Config) WinRMConfigFunc(state multistep.StateBag) (*communicator.WinRMConfig, error) {
+	return &communicator.WinRMConfig{
+		Username: c.Comm.WinRMUser,
+		Password: c.Comm.WinRMPassword,
+	}, nil
 }
 
 type Builder struct {
@@ -57,6 +68,7 @@ type Builder struct {
 	runner  multistep.Runner
 	sshkeys *sshkeys.SSHKeyClient
 	compute *compute.VirtualMachineClient
+	network *network.NetworkClient
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec {
@@ -93,16 +105,22 @@ func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []strin
 		return nil, nil, fmt.Errorf("invalid availability zone: %s", b.config.AvailabilityZone)
 	}
 
-	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
-	if b.config.ImageName == "" {
-		b.config.ImageName = name
+	if b.config.WaitTimeout == time.Duration(0) {
+		b.config.WaitTimeout = DefaultTimeout
 	}
 
-	b.config.Comm.SSHTemporaryKeyPairName = name
+	b.config.uname = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+
+	if b.config.ImageName == "" {
+		b.config.ImageName = b.config.uname
+	}
+
+	b.config.Comm.SSHTemporaryKeyPairName = b.config.uname
 	b.config.Comm.SSHTemporaryKeyPairType = "ed25519"
 
 	b.sshkeys = sshkeys.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey)))
 	b.compute = compute.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
+	b.network = network.New(client.NewMgcClient(client.WithAPIKey(b.config.APIKey), client.WithBaseURL(b.config.URL)))
 
 	return nil, nil, nil
 }
@@ -113,55 +131,56 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&communicator.StepSSHKeyGen{
-			CommConf:            &b.config.Comm,
-			SSHTemporaryKeyPair: b.config.Comm.SSHTemporaryKeyPair,
-		},
 		multistep.If(
-			b.config.PackerDebug,
+			b.config.Comm.Type == "ssh",
+			&communicator.StepSSHKeyGen{
+				CommConf:            &b.config.Comm,
+				SSHTemporaryKeyPair: b.config.Comm.SSHTemporaryKeyPair,
+			},
+		),
+		multistep.If(
+			b.config.PackerDebug && b.config.Comm.Type == "ssh",
 			&communicator.StepDumpSSHKey{
 				Path: fmt.Sprintf("mgc_%s.pem", b.config.PackerBuildName),
 				SSH:  &b.config.Comm.SSH,
-			}),
-		&StepUploadSSHKey{
-			Client: b.sshkeys,
-			SSH:    &b.config.Comm.SSH,
+			},
+		),
+		multistep.If(
+			b.config.Comm.Type == "ssh",
+			&StepUploadSSHKey{
+				Client: b.sshkeys,
+				SSH:    &b.config.Comm.SSH,
+			},
+		),
+		&StepCreateSecurityGroup{
+			Client: b.network,
+			Config: &b.config,
 		},
 		&StepCreateInstance{
 			Client: b.compute,
 			Config: &b.config,
 		},
-		&StepWaitInstanceBoot{
-			Client: b.compute,
-		},
+		multistep.If(
+			b.config.Comm.Type == "winrm",
+			&StepGetWindowsPassword{
+				Client: b.compute,
+				Config: &b.config,
+			},
+		),
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
-			SSHConfig: b.config.Comm.SSHConfigFunc(),
+			Config:      &b.config.Comm,
+			Host:        communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
+			SSHConfig:   b.config.Comm.SSHConfigFunc(),
+			WinRMConfig: b.config.WinRMConfigFunc,
 		},
 		&commonsteps.StepProvision{},
 		&StepStopInstance{
 			Client: b.compute,
-		},
-		&StepWaitInstanceStop{
-			Client: b.compute,
+			Config: &b.config,
 		},
 		&StepCreateSnapshot{
 			Client: b.compute,
 			Config: &b.config,
-		},
-		&StepWaitSnapshotCreation{
-			Client: b.compute,
-		},
-		&StepDeleteInstance{
-			Client: b.compute,
-		},
-		&StepWaitInstanceTeardown{
-			Client: b.compute,
-		},
-		&StepDeleteSSHKey{
-			Client: b.sshkeys,
-			SSH:    &b.config.Comm.SSH,
 		},
 	}
 
@@ -172,6 +191,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err.(error)
 	}
 
-	artifact := &Artifact{StateData: map[string]any{}}
+	snapshot_id := state.Get("snapshot_id").(string)
+	artifact := &Artifact{
+		ID:        snapshot_id,
+		Region:    b.config.Region,
+		StateData: map[string]any{},
+	}
 	return artifact, nil
 }

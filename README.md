@@ -21,9 +21,9 @@ Then, run [`packer init`](https://developer.hashicorp.com/packer/docs/commands/i
 ```hcl
 packer {
   required_plugins {
-    docker = {
-      version = ">= 0.1.0"
+    magalucloud = {
       source  = "github.com/julianolf/magalucloud"
+      version = ">= 0.2.0"
     }
   }
 }
@@ -46,7 +46,7 @@ To install the plugin, please follow the Packer documentation on [installing a p
 ### From Sources
 
 If you prefer to build the plugin from sources, clone the Git repository locally and run the command `go build` from the root directory.
-Upon successful compilation, a `packer-plugin-docker` plugin binary file can be found in the root directory.
+Upon successful compilation, a `packer-plugin-magalucloud` plugin binary file can be found in the root directory.
 To install the compiled plugin, please follow the official Packer documentation on [installing a plugin](https://developer.hashicorp.com/packer/docs/plugins/install).
 
 ### Configuration

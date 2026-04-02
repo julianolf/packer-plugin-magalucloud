@@ -24,7 +24,7 @@ func (a *Artifact) Id() string {
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created in the '%s' region: %s", a.Region, a.ID)
+	return fmt.Sprintf("A custom image was created in the '%s' region: %s", a.Region, a.ID)
 }
 
 func (a *Artifact) State(name string) any {

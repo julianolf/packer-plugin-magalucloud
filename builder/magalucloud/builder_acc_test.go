@@ -45,6 +45,7 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 			expectedLogs := []string{
 				"test.magalucloud.test: Creating temporary ED25519 SSH key",
 				"test.magalucloud.test: Uploading SSH key",
+				"test.magalucloud.test: Creating security group",
 				"test.magalucloud.test: Creating virtual machine instance from cloud-debian-12 LTS",
 				"test.magalucloud.test: Waiting for virtual machine instance",
 				"test.magalucloud.test: Using SSH communicator to connect",
@@ -56,6 +57,7 @@ func TestAccMagaluCloudBuilder(t *testing.T) {
 				"test.magalucloud.test: Creating a snapshot of the virtual machine instance",
 				"test.magalucloud.test: Waiting for snapshot",
 				"test.magalucloud.test: Deleting virtual machine instance",
+				"test.magalucloud.test: Deleting security group",
 				"test.magalucloud.test: Deleting SSH key",
 			}
 
