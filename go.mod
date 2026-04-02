@@ -5,8 +5,9 @@ go 1.25.6
 require (
 	github.com/MagaluCloud/mgc-sdk-go v1.5.0
 	github.com/hashicorp/hcl/v2 v2.24.0
-	github.com/hashicorp/packer-plugin-sdk v0.6.5
+	github.com/hashicorp/packer-plugin-sdk v0.6.7
 	github.com/zclconf/go-cty v1.17.0
+	golang.org/x/sync v0.20.0
 )
 
 require gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -146,7 +147,6 @@ require (
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/term v0.39.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
