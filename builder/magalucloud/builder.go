@@ -1,4 +1,4 @@
-// Copyright (c) Juliano Fernandes 2026
+// Copyright (c) Magalu Cloud 2026
 // SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	BuilderId      = "julianolf.magalucloud"
+	BuilderId      = "packer.magalucloud"
 	WaitInterval   = 10 * time.Second
 	DefaultTimeout = 10 * time.Minute
 )

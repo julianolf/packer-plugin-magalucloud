@@ -1,4 +1,4 @@
-// Copyright (c) Juliano Fernandes 2026
+// Copyright (c) Magalu Cloud 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package main
@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/julianolf/packer-plugin-magalucloud/builder/magalucloud"
-	postprocessor "github.com/julianolf/packer-plugin-magalucloud/post-processor/magalucloud"
-	"github.com/julianolf/packer-plugin-magalucloud/version"
+	"github.com/MagaluCloud/packer-plugin-magalucloud/builder/magalucloud"
+	postprocessor "github.com/MagaluCloud/packer-plugin-magalucloud/post-processor/magalucloud"
+	"github.com/MagaluCloud/packer-plugin-magalucloud/version"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )

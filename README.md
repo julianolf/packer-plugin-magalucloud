@@ -1,7 +1,7 @@
 # Packer Plugin Magalu Cloud
 
-[![CI](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/ci.yml)
-[![Release](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/release.yml/badge.svg)](https://github.com/julianolf/packer-plugin-magalucloud/actions/workflows/release.yml)
+[![CI](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/ci.yml)
+[![Release](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/release.yml/badge.svg)](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/release.yml)
 
 The `Magalu Cloud` multi-component plugin can be used with HashiCorp [Packer](https://www.packer.io) to create custom images.
 For the full list of available features for this plugin see [docs](docs).
@@ -22,7 +22,7 @@ Then, run [`packer init`](https://developer.hashicorp.com/packer/docs/commands/i
 packer {
   required_plugins {
     magalucloud = {
-      source  = "github.com/julianolf/magalucloud"
+      source  = "github.com/MagaluCloud/magalucloud"
       version = ">= 0.2.0"
     }
   }
@@ -39,7 +39,7 @@ There is no change to the syntax or commands for installing plugins.
 
 #### Manual installation
 
-You can find pre-built binary releases of the plugin [here](https://github.com/julianolf/packer-plugin-magalucloud/releases).
+You can find pre-built binary releases of the plugin [here](https://github.com/MagaluCloud/packer-plugin-magalucloud/releases).
 Once you have downloaded the latest archive corresponding to your target OS, uncompress it to retrieve the plugin binary file corresponding to your platform.
 To install the plugin, please follow the Packer documentation on [installing a plugin](https://developer.hashicorp.com/packer/docs/plugins/install).
 

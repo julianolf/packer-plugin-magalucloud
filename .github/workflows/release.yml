@@ -76,7 +76,7 @@ jobs:
       - name: Notify Release
         uses: ./integration-release-action
         with:
-          integration_identifier: "packer/julianolf/magalucloud"
+          integration_identifier: "packer/MagaluCloud/magalucloud"
           release_version: ${{ needs.release.outputs.version }}
           release_sha: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-// Copyright (c) Juliano Fernandes 2026
+// Copyright (c) Magalu Cloud 2026
 // SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	BuilderId    = "julianolf.post-processor.magalucloud-import"
+	BuilderId    = "packer.post-processor.magalucloud-import"
 	ImageHeader  = "QFI\xfb"
 	ImageFormat  = "qcow2"
 	ImageFileExt = "." + ImageFormat

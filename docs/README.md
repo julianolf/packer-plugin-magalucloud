@@ -7,7 +7,7 @@ then run [`packer init`](https://www.packer.io/docs/commands/init).
 packer {
   required_plugins {
     name = {
-      source  = "github.com/julianolf/magalucloud"
+      source  = "github.com/MagaluCloud/magalucloud"
       version = ">= 0.2.0"
     }
   }
@@ -17,14 +17,14 @@ packer {
 Alternatively, you can use `packer plugins install` to manage the installation of this plugin.
 
 ```sh
-$ packer plugins install github.com/julianolf/magalucloud
+$ packer plugins install github.com/MagaluCloud/magalucloud
 ```
 
 ### Components
 
 #### Builders
 
-* [magalucloud](/packer/integrations/julianolf/magalucloud/latest/components/builder/magalucloud) - The
+* [magalucloud](/packer/integrations/MagaluCloud/magalucloud/latest/components/builder/magalucloud) - The
   magalucloud builder creates images from existing ones by launching an instance, provisioning it, and then
   exporting it as a reusable image.
 
@@ -32,7 +32,7 @@ $ packer plugins install github.com/julianolf/magalucloud
 
 #### Post-Processors
 
-* [magalucloud-import](/packer/integrations/julianolf/magalucloud/latest/components/post-processor/magalucloud-import) -
+* [magalucloud-import](/packer/integrations/MagaluCloud/magalucloud/latest/components/post-processor/magalucloud-import) -
   The magalucloud-import post-processor imports an existing image as an MGC custom image that can be
   used to launch instances.
 

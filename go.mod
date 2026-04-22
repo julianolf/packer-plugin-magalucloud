@@ -1,4 +1,4 @@
-module github.com/julianolf/packer-plugin-magalucloud
+module github.com/MagaluCloud/packer-plugin-magalucloud
 
 go 1.25.6
 

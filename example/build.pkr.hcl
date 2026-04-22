@@ -1,10 +1,10 @@
-# Copyright (c) Juliano Fernandes 2026
+# Copyright (c) Magalu Cloud 2026
 # SPDX-License-Identifier: MPL-2.0
 
 packer {
   required_plugins {
     magalucloud = {
-      source  = "github.com/julianolf/magalucloud"
+      source  = "github.com/MagaluCloud/magalucloud"
       version = ">= 0.2.0"
     }
   }

@@ -1,5 +1,5 @@
 Type: `magalucloud`
-Artifact BuilderId: `julianolf.magalucloud`
+Artifact BuilderId: `MagaluCloud.magalucloud`
 
 The `magalucloud` Packer builder is able to create [images](https://docs.magalu.cloud/docs/computing/images/general-overview)
 for use with Magalu Cloud [Virtual Machines](https://docs.magalu.cloud/docs/computing/virtual-machine/overview)

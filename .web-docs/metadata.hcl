@@ -1,4 +1,4 @@
-# Copyright (c) Juliano Fernandes 2026
+# Copyright (c) Magalu Cloud 2026
 # SPDX-License-Identifier: MPL-2.0
 
 integration {
@@ -8,7 +8,7 @@ integration {
   flags       = ["hcp-ready"]
   license {
     type = "MPL-2.0"
-    url  = "https://github.com/julianolf/packer-plugin-magalucloud/blob/main/LICENSE"
+    url  = "https://github.com/MagaluCloud/packer-plugin-magalucloud/blob/main/LICENSE"
   }
   component {
     type = "builder"
