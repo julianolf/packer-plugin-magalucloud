@@ -12,7 +12,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -243,20 +242,21 @@ func (i *Importer) uploadImage(ctx context.Context, ui packersdk.Ui, artifact pa
 
 	ui.Sayf("Generating presigned URL for %s/%s/%s", i.config.Endpoint, i.config.Bucket, i.config.Filename)
 
-	sURL, err := i.objectstorage.Presigner().GeneratePresignedURL(
+	sURL, err := i.objectstorage.Objects().GetPresignedURL(
 		ctx,
-		http.MethodGet,
 		i.config.Bucket,
 		i.config.Filename,
-		i.config.Expires,
-		url.Values{},
+		objectstorage.GetPresignedURLOptions{
+			Method:          http.MethodGet,
+			ExpiryInSeconds: &i.config.Expires,
+		},
 	)
 	if err != nil {
 		return "", err
 	}
 
-	log.Printf("[DEBUG] Presigned URL %s", sURL)
-	return sURL.String(), nil
+	log.Printf("[DEBUG] Presigned URL %s", sURL.URL)
+	return sURL.URL, nil
 }
 
 func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string) (string, error) {
@@ -280,7 +280,7 @@ func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string
 
 	ui.Sayf("Importing image %s using presigned URL", i.config.ImageName)
 
-	id, err := i.compute.CustomImages().Create(ctx, req)
+	id, err := i.compute.Images().CreateCustom(ctx, req)
 	if err != nil {
 		return "", err
 	}
@@ -295,7 +295,7 @@ func (i *Importer) importImage(ctx context.Context, ui packersdk.Ui, sURL string
 		case <-ctx.Done():
 			return "", ctx.Err()
 		case <-ticker.C:
-			image, err := i.compute.CustomImages().Get(ctx, id)
+			image, err := i.compute.Images().GetCustom(ctx, id)
 			if err != nil {
 				return "", err
 			}
