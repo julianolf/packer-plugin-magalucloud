@@ -5,7 +5,7 @@ packer {
   required_plugins {
     magalucloud = {
       source  = "github.com/MagaluCloud/magalucloud"
-      version = ">= 0.2.0"
+      version = ">= 0.3.0"
     }
   }
 }
