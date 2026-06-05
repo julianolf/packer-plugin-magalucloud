@@ -6,3 +6,14 @@
 .env
 dist/
 packer-plugin-magalucloud
+packer-plugin-magalucloud.exe
+
+# Go test artifacts
+*.test
+coverage.out
+coverage.html
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
