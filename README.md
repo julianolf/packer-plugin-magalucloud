@@ -1,9 +1,15 @@
 # Packer Plugin Magalu Cloud
 
 [![CI](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/MagaluCloud/packer-plugin-magalucloud)](https://goreportcard.com/report/github.com/MagaluCloud/packer-plugin-magalucloud)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/MagaluCloud/packer-plugin-magalucloud)](https://github.com/MagaluCloud/packer-plugin-magalucloud)
 [![Release](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/release.yml/badge.svg)](https://github.com/MagaluCloud/packer-plugin-magalucloud/actions/workflows/release.yml)
+[![GitHub release (latest)](https://img.shields.io/github/v/release/MagaluCloud/packer-plugin-magalucloud)](https://github.com/MagaluCloud/packer-plugin-magalucloud/releases)
+[![HashiCorp Partner](https://img.shields.io/badge/HashiCorp-Technology%20Partner-7B42BC)](https://developer.hashicorp.com/packer/integrations/magalucloud/magalucloud)
+[![License](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 The `Magalu Cloud` multi-component plugin can be used with HashiCorp [Packer](https://www.packer.io) to create custom images.
+As an official HashiCorp Partner, this plugin follows Packer best practices for reliability and user experience.
 For the full list of available features for this plugin see [docs](docs).
 
 ## Installation
